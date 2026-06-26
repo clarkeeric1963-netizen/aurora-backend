@@ -9,8 +9,9 @@ public class HealthController : ControllerBase
     [HttpGet("health")]
     public IActionResult Health() => Ok(new { status = "ok", service = "AuroraTms.Api", time = DateTime.UtcNow });
 
-    [HttpGet("")]
-    public IActionResult Root() => Ok(new
+    // Moved off "/" so the bundled app (wwwroot/index.html) serves at the root.
+    [HttpGet("/info")]
+    public IActionResult Info() => Ok(new
     {
         service = "Aurora TMS API",
         version = "1.0",
