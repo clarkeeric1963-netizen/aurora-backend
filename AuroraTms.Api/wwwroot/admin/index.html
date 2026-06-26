@@ -74,4 +74,69 @@
 
   async function api(path, method, body) {
     method = method || "GET";
-    const res
+    const res = await fetch(path, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : {},
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (res.status === 401) { window.location.href = "/admin/login.html"; throw new Error("Session expired"); }
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || ("Error " + res.status));
+    return text ? JSON.parse(text) : null;
+  }
+
+  $("subdomain").addEventListener("input", function () {
+    const s = $("subdomain").value.trim().toLowerCase();
+    $("urlpreview").textContent = (s || "subdomain") + ".auroratms.com";
+  });
+
+  $("logout").addEventListener("click", async function () {
+    try { await fetch("/admin/logout", { method: "POST" }); } catch (e) {}
+    window.location.href = "/admin/login.html";
+  });
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (m) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[m]; }); }
+
+  async function loadTenants() {
+    try {
+      const rows = await api("/api/customers");
+      if (!rows || !rows.length) { $("list").innerHTML = "<p style='color:#64748b;font-size:13px'>No tenants yet.</p>"; return; }
+      let html = "<table><tr><th>Company</th><th>URL</th><th>Tier</th><th>Status</th></tr>";
+      for (const c of rows) {
+        const url = c.subdomain ? c.subdomain + ".auroratms.com" : "—";
+        html += "<tr><td>" + esc(c.company) + "</td><td class='sub'>" + esc(url) + "</td><td>" + esc(c.tier || "—") + "</td><td><span class='pill'>" + esc(c.status || "Active") + "</span></td></tr>";
+      }
+      html += "</table>";
+      $("list").innerHTML = html;
+    } catch (e) { $("list").innerHTML = "<p style='color:#dc2626;font-size:13px'>" + esc(e.message) + "</p>"; }
+  }
+
+  $("create").addEventListener("click", async function () {
+    const msg = $("msg"); msg.className = "msg"; msg.textContent = "";
+    const company = $("company").value.trim();
+    if (!company) { msg.className = "msg err"; msg.textContent = "Company name is required."; return; }
+    const body = {
+      company: company,
+      subdomain: $("subdomain").value.trim().toLowerCase() || null,
+      tier: $("tier").value,
+      contact: $("contact").value.trim() || null,
+      email: $("email").value.trim() || null,
+      phone: $("phone").value.trim() || null,
+      status: "Active"
+    };
+    $("create").disabled = true; $("create").textContent = "Creating…";
+    try {
+      await api("/api/customers", "POST", body);
+      msg.className = "msg ok"; msg.textContent = "Tenant created.";
+      ["company","subdomain","contact","email","phone"].forEach(function (id) { $(id).value = ""; });
+      $("urlpreview").textContent = "subdomain.auroratms.com";
+      loadTenants();
+    } catch (e) {
+      msg.className = "msg err"; msg.textContent = e.message;
+    } finally { $("create").disabled = false; $("create").textContent = "Create tenant"; }
+  });
+
+  loadTenants();
+</script>
+</body>
+</html>
