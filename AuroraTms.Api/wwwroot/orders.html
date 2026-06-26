@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Aurora TMS — Orders</title>
 <style>
-  :root{--blue:#2563eb;--cyan:#0e7490;--bg:#eef1f5;--card:#fff;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--input:#f1f5f9}
+  :root{--blue:#2563eb;--cyan:#0e7490;--bg:#eef1f5;--card:#fff;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--input:#f1f5f9;--ok:#059669}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
   .bar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border)}
@@ -13,25 +13,36 @@
   .brand{font-weight:800}.brand span{color:var(--muted);font-weight:600}
   .tenantbox{margin-left:auto;display:flex;align-items:center;gap:8px}
   .tenantbox label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-  select{padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--input);font-size:13px;font-family:inherit;color:var(--text)}
+  select,input{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--input);font-size:13px;font-family:inherit;color:var(--text)}
+  select:focus,input:focus{outline:none;border-color:var(--blue)}
   .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
   .head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
   h2{font-size:17px;font-weight:800}
   .count{font-size:12px;color:var(--muted);font-weight:600}
-  .refresh{margin-left:auto;padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text)}
-  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .spacer{margin-left:auto}
+  .btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text)}
+  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
+  .form{padding:18px}
+  .form h3{font-size:14px;font-weight:800;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .field input,.field select{width:100%}
+  .actions{display:flex;align-items:center;gap:10px;margin-top:16px}
+  .msg{font-size:13px;font-weight:600;min-height:18px}
+  .msg.ok{color:var(--ok)}.msg.err{color:#dc2626}
+  .hidden{display:none}
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
   th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);background:#f8fafc}
   tr:last-child td{border-bottom:none}
   .id{font-weight:700;color:var(--blue)}
-  .route{color:var(--text)}.route .arrow{color:var(--muted);margin:0 6px}
+  .route .arrow{color:var(--muted);margin:0 6px}
   .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
-  .b-plan{background:#e2e8f0;color:#475569}
-  .b-disp{background:#dbeafe;color:#1d4ed8}
-  .b-tran{background:#fef3c7;color:#b45309}
-  .b-deliv{background:#dcfce7;color:#166534}
-  .b-other{background:#f1f5f9;color:#64748b}
+  .b-plan{background:#e2e8f0;color:#475569}.b-disp{background:#dbeafe;color:#1d4ed8}
+  .b-tran{background:#fef3c7;color:#b45309}.b-deliv{background:#dcfce7;color:#166534}.b-other{background:#f1f5f9;color:#64748b}
   .pri-High{color:#dc2626;font-weight:700}.pri-Medium{color:#b45309;font-weight:600}.pri-Low{color:#64748b}
   .state{padding:40px;text-align:center;color:var(--muted);font-size:14px}
   .state.err{color:#dc2626}
@@ -54,9 +65,40 @@
   <div class="head">
     <h2>Orders</h2>
     <span class="count" id="count"></span>
-    <button class="refresh" id="refresh">Refresh</button>
+    <div class="spacer"></div>
+    <button class="btn primary" id="toggleNew">+ New order</button>
+    <button class="btn" id="refresh">Refresh</button>
   </div>
-  <div class="panel" id="panel">
+
+  <div class="panel hidden" id="newPanel">
+    <div class="form">
+      <h3>New order</h3>
+      <div class="grid">
+        <div class="field"><label>Customer</label><input id="f_customer" placeholder="Greenfield Logistics" /></div>
+        <div class="field"><label>Origin</label><input id="f_origin" placeholder="Orlando, FL" /></div>
+        <div class="field"><label>Destination</label><input id="f_dest" placeholder="Atlanta, GA" /></div>
+        <div class="field"><label>Status</label>
+          <select id="f_status">
+            <option>Planning</option><option>Dispatched</option><option>In Transit</option><option>Delivered</option>
+          </select>
+        </div>
+        <div class="field"><label>Priority</label>
+          <select id="f_priority"><option>Medium</option><option>High</option><option>Low</option></select>
+        </div>
+        <div class="field"><label>Bill date</label><input id="f_date" type="date" /></div>
+        <div class="field"><label>Driver</label><input id="f_driver" placeholder="Marcus Johnson" /></div>
+        <div class="field"><label>Equipment</label><input id="f_equipment" placeholder="Dry Van #1042" /></div>
+        <div class="field"><label>Rate</label><input id="f_rate" placeholder="$2,450.00" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="create">Create order</button>
+        <button class="btn" id="cancel">Cancel</button>
+        <span class="msg" id="msg"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
     <div class="state" id="state">Loading…</div>
   </div>
 </div>
@@ -64,53 +106,82 @@
 <script>
   const $ = id => document.getElementById(id);
   const TENANT_KEY = "aurora_tenant_demo";
-
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
 
+  function todayLocal(){
+    const d=new Date(); const mm=String(d.getMonth()+1).padStart(2,"0"); const dd=String(d.getDate()).padStart(2,"0");
+    return d.getFullYear()+"-"+mm+"-"+dd;
+  }
+  function toMDY(iso){ if(!iso)return ""; const p=iso.split("-"); return p.length===3?(p[1]+"/"+p[2]+"/"+p[0]):iso; }
+
   function badge(status){
-    const s=(status||"").toLowerCase();
-    let cls="b-other";
-    if(s.includes("plan"))cls="b-plan";
-    else if(s.includes("disp"))cls="b-disp";
-    else if(s.includes("transit"))cls="b-tran";
-    else if(s.includes("deliver"))cls="b-deliv";
+    const s=(status||"").toLowerCase(); let cls="b-other";
+    if(s.includes("plan"))cls="b-plan"; else if(s.includes("disp"))cls="b-disp";
+    else if(s.includes("transit"))cls="b-tran"; else if(s.includes("deliver"))cls="b-deliv";
     return "<span class='badge "+cls+"'>"+esc(status||"—")+"</span>";
   }
 
+  function tenant(){ return $("tenant").value; }
+
   async function load(){
-    const tenant=$("tenant").value;
-    $("state")&&($("panel").innerHTML="<div class='state' id='state'>Loading…</div>");
+    $("count").textContent="";
+    document.querySelector(".panel:last-child").innerHTML="<div class='state'>Loading…</div>";
     try{
-      const res=await fetch("/api/orders",{headers:{"X-Tenant":tenant}});
+      const res=await fetch("/api/orders",{headers:{"X-Tenant":tenant()}});
       if(!res.ok)throw new Error("Server returned "+res.status);
       const rows=await res.json();
-      $("count").textContent=rows.length+" order"+(rows.length===1?"":"s")+" · tenant: "+tenant;
-      if(!rows.length){$("panel").innerHTML="<div class='state'>No orders for this tenant yet.</div>";return;}
+      $("count").textContent=rows.length+" order"+(rows.length===1?"":"s")+" · tenant: "+tenant();
+      const panel=document.querySelector(".panel:last-child");
+      if(!rows.length){panel.innerHTML="<div class='state'>No orders for this tenant yet.</div>";return;}
       let h="<table><thead><tr><th>Order #</th><th>Customer</th><th>Route</th><th>Status</th><th>Priority</th><th>Driver</th><th>Equipment</th><th>Date</th><th>Rate</th></tr></thead><tbody>";
       for(const o of rows){
         const route=esc(o.origin||"—")+"<span class='arrow'>→</span>"+esc(o.dest||"—");
-        h+="<tr>"+
-          "<td class='id'>"+esc(o.id)+"</td>"+
-          "<td>"+esc(o.customer||"—")+"</td>"+
-          "<td class='route'>"+route+"</td>"+
-          "<td>"+badge(o.status)+"</td>"+
-          "<td class='pri-"+esc(o.priority||"")+"'>"+esc(o.priority||"—")+"</td>"+
-          "<td>"+esc(o.driver||"—")+"</td>"+
-          "<td>"+esc(o.equipment||"—")+"</td>"+
-          "<td>"+esc(o.orderDate||"—")+"</td>"+
-          "<td>"+esc(o.rate||"—")+"</td>"+
-        "</tr>";
+        h+="<tr><td class='id'>"+esc(o.id)+"</td><td>"+esc(o.customer||"—")+"</td><td class='route'>"+route+"</td><td>"+badge(o.status)+"</td><td class='pri-"+esc(o.priority||"")+"'>"+esc(o.priority||"—")+"</td><td>"+esc(o.driver||"—")+"</td><td>"+esc(o.equipment||"—")+"</td><td>"+esc(o.orderDate||"—")+"</td><td>"+esc(o.rate||"—")+"</td></tr>";
       }
       h+="</tbody></table>";
-      $("panel").innerHTML=h;
+      panel.innerHTML=h;
     }catch(e){
-      $("panel").innerHTML="<div class='state err' id='state'>Couldn't load orders: "+esc(e.message)+"</div>";
-      $("count").textContent="";
+      document.querySelector(".panel:last-child").innerHTML="<div class='state err'>Couldn't load orders: "+esc(e.message)+"</div>";
     }
   }
 
-  $("tenant").addEventListener("change",()=>{ try{localStorage.setItem(TENANT_KEY,$("tenant").value);}catch(e){} load(); });
+  function showForm(show){ $("newPanel").classList.toggle("hidden",!show); if(show)$("f_date").value=todayLocal(); }
+
+  $("toggleNew").addEventListener("click",()=>showForm($("newPanel").classList.contains("hidden")));
+  $("cancel").addEventListener("click",()=>showForm(false));
   $("refresh").addEventListener("click",load);
+  $("tenant").addEventListener("change",()=>{ try{localStorage.setItem(TENANT_KEY,tenant());}catch(e){} load(); });
+
+  $("create").addEventListener("click",async ()=>{
+    const msg=$("msg"); msg.className="msg"; msg.textContent="";
+    const customer=$("f_customer").value.trim();
+    if(!customer){ msg.className="msg err"; msg.textContent="Customer is required."; return; }
+    const body={
+      id:"ORD-"+Math.random().toString(36).slice(2,8).toUpperCase(),
+      tenantId:tenant(),
+      customer:customer,
+      origin:$("f_origin").value.trim()||null,
+      dest:$("f_dest").value.trim()||null,
+      status:$("f_status").value,
+      priority:$("f_priority").value,
+      orderDate:toMDY($("f_date").value)||null,
+      driver:$("f_driver").value.trim()||null,
+      equipment:$("f_equipment").value.trim()||null,
+      rate:$("f_rate").value.trim()||null,
+      lineItems:[]
+    };
+    $("create").disabled=true; $("create").textContent="Creating…";
+    try{
+      const res=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json","X-Tenant":tenant()},body:JSON.stringify(body)});
+      if(!res.ok){ const t=await res.text(); throw new Error(t||("Error "+res.status)); }
+      msg.className="msg ok"; msg.textContent="Order created.";
+      ["f_customer","f_origin","f_dest","f_driver","f_equipment","f_rate"].forEach(id=>$(id).value="");
+      load();
+      setTimeout(()=>showForm(false),700);
+    }catch(e){ msg.className="msg err"; msg.textContent=e.message; }
+    finally{ $("create").disabled=false; $("create").textContent="Create order"; }
+  });
+
   try{const t=localStorage.getItem(TENANT_KEY); if(t)$("tenant").value=t;}catch(e){}
   load();
 </script>
