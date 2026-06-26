@@ -11,47 +11,48 @@
   .bar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border)}
   .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
   .brand{font-weight:800}.brand span{color:var(--muted);font-weight:600}
+  .nav{display:flex;gap:14px;margin-left:18px}.nav a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}.nav a.active{color:var(--blue)}
   .tenantbox{margin-left:auto;display:flex;align-items:center;gap:8px}
   .tenantbox label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
   select,input{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--input);font-size:13px;font-family:inherit;color:var(--text)}
   select:focus,input:focus{outline:none;border-color:var(--blue)}
   .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
   .head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  h2{font-size:17px;font-weight:800}
-  .count{font-size:12px;color:var(--muted);font-weight:600}
-  .spacer{margin-left:auto}
+  h2{font-size:17px;font-weight:800}.count{font-size:12px;color:var(--muted);font-weight:600}.spacer{margin-left:auto}
   .btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text)}
-  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.sm{padding:8px 10px;font-size:12px;white-space:nowrap}
   .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
-  .form{padding:18px}
-  .form h3{font-size:14px;font-weight:800;margin-bottom:14px}
+  .form{padding:18px}.form h3{font-size:14px;font-weight:800;margin-bottom:14px}
+  .form h4{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:18px 0 10px}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   .field{display:flex;flex-direction:column;gap:4px}
   .field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
   .field input,.field select{width:100%}
+  .lookup{display:flex;gap:6px}.lookup select{flex:1}
+  .addr{font-size:12px;color:var(--muted);background:#f8fafc;border:1px dashed var(--border);border-radius:8px;padding:8px 10px;min-height:34px;line-height:1.5}
+  .newacct{margin-top:14px;border:1px solid var(--blue);border-radius:10px;padding:14px;background:#f8faff}
+  .newacct-title{font-size:13px;font-weight:800;margin-bottom:10px;color:var(--blue)}
   .actions{display:flex;align-items:center;gap:10px;margin-top:16px}
-  .msg{font-size:13px;font-weight:600;min-height:18px}
-  .msg.ok{color:var(--ok)}.msg.err{color:#dc2626}
+  .msg{font-size:13px;font-weight:600;min-height:18px}.msg.ok{color:var(--ok)}.msg.err{color:#dc2626}
   .hidden{display:none}
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
   th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);background:#f8fafc}
   tr:last-child td{border-bottom:none}
-  .id{font-weight:700;color:var(--blue)}
-  .route .arrow{color:var(--muted);margin:0 6px}
+  .id{font-weight:700;color:var(--blue)}.route .arrow{color:var(--muted);margin:0 6px}
   .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
   .b-plan{background:#e2e8f0;color:#475569}.b-disp{background:#dbeafe;color:#1d4ed8}
   .b-tran{background:#fef3c7;color:#b45309}.b-deliv{background:#dcfce7;color:#166534}.b-other{background:#f1f5f9;color:#64748b}
   .pri-High{color:#dc2626;font-weight:700}.pri-Medium{color:#b45309;font-weight:600}.pri-Low{color:#64748b}
-  .state{padding:40px;text-align:center;color:var(--muted);font-size:14px}
-  .state.err{color:#dc2626}
+  .state{padding:40px;text-align:center;color:var(--muted);font-size:14px}.state.err{color:#dc2626}
 </style>
 </head>
 <body>
 <div class="bar">
   <div class="logo">A</div>
   <div class="brand">Aurora TMS <span>· Orders</span></div>
+  <div class="nav"><a href="/orders.html" class="active">Orders</a><a href="/accounts.html">Accounts</a></div>
   <div class="tenantbox">
     <label for="tenant">Tenant</label>
     <select id="tenant">
@@ -63,9 +64,7 @@
 
 <div class="wrap">
   <div class="head">
-    <h2>Orders</h2>
-    <span class="count" id="count"></span>
-    <div class="spacer"></div>
+    <h2>Orders</h2><span class="count" id="count"></span><div class="spacer"></div>
     <button class="btn primary" id="toggleNew">+ New order</button>
     <button class="btn" id="refresh">Refresh</button>
   </div>
@@ -77,19 +76,41 @@
         <div class="field"><label>Customer</label><input id="f_customer" placeholder="Greenfield Logistics" /></div>
         <div class="field"><label>Origin</label><input id="f_origin" placeholder="Orlando, FL" /></div>
         <div class="field"><label>Destination</label><input id="f_dest" placeholder="Atlanta, GA" /></div>
-        <div class="field"><label>Status</label>
-          <select id="f_status">
-            <option>Planning</option><option>Dispatched</option><option>In Transit</option><option>Delivered</option>
-          </select>
-        </div>
-        <div class="field"><label>Priority</label>
-          <select id="f_priority"><option>Medium</option><option>High</option><option>Low</option></select>
-        </div>
+        <div class="field"><label>Status</label><select id="f_status"><option>Planning</option><option>Dispatched</option><option>In Transit</option><option>Delivered</option></select></div>
+        <div class="field"><label>Priority</label><select id="f_priority"><option>Medium</option><option>High</option><option>Low</option></select></div>
         <div class="field"><label>Bill date</label><input id="f_date" type="date" /></div>
         <div class="field"><label>Driver</label><input id="f_driver" placeholder="Marcus Johnson" /></div>
         <div class="field"><label>Equipment</label><input id="f_equipment" placeholder="Dry Van #1042" /></div>
         <div class="field"><label>Rate</label><input id="f_rate" placeholder="$2,450.00" /></div>
       </div>
+
+      <h4>Parties (look up from your accounts — or add a new one on the fly)</h4>
+      <div class="grid">
+        <div class="field"><label>Shipper</label><div class="lookup"><select id="f_shipper"></select><button class="btn sm" type="button" id="add_shipper">+ New</button></div><div class="addr" id="addr_shipper">Select a shipper…</div></div>
+        <div class="field"><label>Consignee</label><div class="lookup"><select id="f_consignee"></select><button class="btn sm" type="button" id="add_consignee">+ New</button></div><div class="addr" id="addr_consignee">Select a consignee…</div></div>
+        <div class="field"><label>Bill-To</label><div class="lookup"><select id="f_billto"></select><button class="btn sm" type="button" id="add_billto">+ New</button></div><div class="addr" id="addr_billto">Select a bill-to…</div></div>
+      </div>
+
+      <div class="newacct hidden" id="newAcct">
+        <div class="newacct-title" id="newAcctTitle">New account</div>
+        <div class="grid">
+          <div class="field"><label>Name</label><input id="na_name" placeholder="Acme Distribution" /></div>
+          <div class="field"><label>Contact</label><input id="na_contact" placeholder="Jane Smith" /></div>
+          <div class="field"><label>Main phone</label><input id="na_phone" placeholder="(404) 555-0100" /></div>
+          <div class="field"><label>Address</label><input id="na_address" placeholder="123 Main St" /></div>
+          <div class="field"><label>Address 2</label><input id="na_address2" placeholder="Suite 100" /></div>
+          <div class="field"><label>City</label><input id="na_city" placeholder="Atlanta" /></div>
+          <div class="field"><label>State</label><input id="na_state" placeholder="GA" /></div>
+          <div class="field"><label>Zip</label><input id="na_zip" placeholder="30301" /></div>
+          <div class="field"><label>Country</label><input id="na_country" value="US" /></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="button" id="saveAcct">Save &amp; use</button>
+          <button class="btn" type="button" id="cancelAcct">Cancel</button>
+          <span class="msg" id="acctMsg"></span>
+        </div>
+      </div>
+
       <div class="actions">
         <button class="btn primary" id="create">Create order</button>
         <button class="btn" id="cancel">Cancel</button>
@@ -98,20 +119,19 @@
     </div>
   </div>
 
-  <div class="panel">
-    <div class="state" id="state">Loading…</div>
-  </div>
+  <div class="panel"><div class="state" id="state">Loading…</div></div>
 </div>
 
 <script>
   const $ = id => document.getElementById(id);
   const TENANT_KEY = "aurora_tenant_demo";
-  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
+  let accounts = [];
+  const picked = { shipper:null, consignee:null, billto:null };
+  let acctCtx = null; // {role, selId, addrId, key}
 
-  function todayLocal(){
-    const d=new Date(); const mm=String(d.getMonth()+1).padStart(2,"0"); const dd=String(d.getDate()).padStart(2,"0");
-    return d.getFullYear()+"-"+mm+"-"+dd;
-  }
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
+  function tenant(){ return $("tenant").value; }
+  function todayLocal(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   function toMDY(iso){ if(!iso)return ""; const p=iso.split("-"); return p.length===3?(p[1]+"/"+p[2]+"/"+p[0]):iso; }
 
   function badge(status){
@@ -121,11 +141,70 @@
     return "<span class='badge "+cls+"'>"+esc(status||"—")+"</span>";
   }
 
-  function tenant(){ return $("tenant").value; }
+  function partyObj(a){ return { accountId:a.id, name:a.name, address:a.address||null, address2:a.address2||null, city:a.city||null, state:a.state||null, zip:a.zip||null, country:a.country||null, phone:a.mainPhone||null, contact:a.contact||null }; }
+  function addrText(a){ const l1=[a.address,a.address2].filter(Boolean).join(", "); const l2=([a.city,a.state].filter(Boolean).join(", ")+(a.zip?" "+a.zip:"")).trim(); return [a.name,l1,l2].filter(Boolean).map(esc).join("<br>"); }
+
+  function fillSelect(selId, type){
+    const sel=$(selId); const cur=sel.value; sel.innerHTML="";
+    const none=document.createElement("option"); none.value=""; none.textContent="— none —"; sel.appendChild(none);
+    accounts.filter(a=>(a.type||"")===type).forEach(a=>{ const o=document.createElement("option"); o.value=a.id; o.textContent=a.name; sel.appendChild(o); });
+    if(cur)sel.value=cur;
+  }
+  function selectInto(selId, addrId, key, a){ $(selId).value=a.id; picked[key]=partyObj(a); $(addrId).innerHTML=addrText(a); }
+  function upsert(a){ if(!accounts.some(x=>x.id===a.id))accounts.push(a); }
+
+  function wireParty(selId, addrId, key){
+    $(selId).addEventListener("change",()=>{
+      const a=accounts.find(x=>x.id===$(selId).value);
+      if(a){ picked[key]=partyObj(a); $(addrId).innerHTML=addrText(a); }
+      else { picked[key]=null; $(addrId).textContent="Select…"; }
+    });
+  }
+
+  function openNewAcct(role, selId, addrId, key){
+    acctCtx={role,selId,addrId,key};
+    $("newAcctTitle").textContent="New "+role;
+    ["na_name","na_contact","na_phone","na_address","na_address2","na_city","na_state","na_zip"].forEach(id=>$(id).value="");
+    $("na_country").value="US"; $("acctMsg").textContent=""; $("acctMsg").className="msg";
+    $("newAcct").classList.remove("hidden"); $("na_name").focus();
+  }
+
+  $("saveAcct").addEventListener("click",async ()=>{
+    if(!acctCtx)return;
+    const m=$("acctMsg"); m.className="msg"; m.textContent="";
+    const name=$("na_name").value.trim();
+    if(!name){ m.className="msg err"; m.textContent="Name is required."; return; }
+    const body={ id:"ACCT-"+Math.random().toString(36).slice(2,8).toUpperCase(), tenantId:tenant(), name:name, type:acctCtx.role,
+      contact:$("na_contact").value.trim()||null, mainPhone:$("na_phone").value.trim()||null, address:$("na_address").value.trim()||null,
+      address2:$("na_address2").value.trim()||null, city:$("na_city").value.trim()||null, state:$("na_state").value.trim()||null,
+      zip:$("na_zip").value.trim()||null, country:$("na_country").value.trim()||null };
+    $("saveAcct").disabled=true; $("saveAcct").textContent="Saving…";
+    try{
+      const res=await fetch("/api/accounts",{method:"POST",headers:{"Content-Type":"application/json","X-Tenant":tenant()},body:JSON.stringify(body)});
+      if(res.status===409){
+        const data=await res.json().catch(()=>({}));
+        if(data.existing){ upsert(data.existing); fillSelect(acctCtx.selId,acctCtx.role); selectInto(acctCtx.selId,acctCtx.addrId,acctCtx.key,data.existing); $("newAcct").classList.add("hidden"); return; }
+        throw new Error(data.error||"That account already exists.");
+      }
+      if(!res.ok){ const t=await res.text(); throw new Error(t||("Error "+res.status)); }
+      const created=await res.json();
+      upsert(created); fillSelect(acctCtx.selId,acctCtx.role); selectInto(acctCtx.selId,acctCtx.addrId,acctCtx.key,created);
+      $("newAcct").classList.add("hidden");
+    }catch(e){ m.className="msg err"; m.textContent=e.message; }
+    finally{ $("saveAcct").disabled=false; $("saveAcct").textContent="Save & use"; }
+  });
+  $("cancelAcct").addEventListener("click",()=>$("newAcct").classList.add("hidden"));
+
+  async function loadAccounts(){
+    try{ const res=await fetch("/api/accounts",{headers:{"X-Tenant":tenant()}}); accounts=res.ok?await res.json():[]; }catch(e){ accounts=[]; }
+    fillSelect("f_shipper","Shipper"); fillSelect("f_consignee","Consignee"); fillSelect("f_billto","Bill-To");
+    picked.shipper=picked.consignee=picked.billto=null;
+    $("addr_shipper").textContent="Select a shipper…"; $("addr_consignee").textContent="Select a consignee…"; $("addr_billto").textContent="Select a bill-to…";
+    $("newAcct").classList.add("hidden");
+  }
 
   async function load(){
-    $("count").textContent="";
-    document.querySelector(".panel:last-child").innerHTML="<div class='state'>Loading…</div>";
+    $("count").textContent=""; document.querySelector(".panel:last-child").innerHTML="<div class='state'>Loading…</div>";
     try{
       const res=await fetch("/api/orders",{headers:{"X-Tenant":tenant()}});
       if(!res.ok)throw new Error("Server returned "+res.status);
@@ -138,46 +217,36 @@
         const route=esc(o.origin||"—")+"<span class='arrow'>→</span>"+esc(o.dest||"—");
         h+="<tr><td class='id'>"+esc(o.id)+"</td><td>"+esc(o.customer||"—")+"</td><td class='route'>"+route+"</td><td>"+badge(o.status)+"</td><td class='pri-"+esc(o.priority||"")+"'>"+esc(o.priority||"—")+"</td><td>"+esc(o.driver||"—")+"</td><td>"+esc(o.equipment||"—")+"</td><td>"+esc(o.orderDate||"—")+"</td><td>"+esc(o.rate||"—")+"</td></tr>";
       }
-      h+="</tbody></table>";
-      panel.innerHTML=h;
-    }catch(e){
-      document.querySelector(".panel:last-child").innerHTML="<div class='state err'>Couldn't load orders: "+esc(e.message)+"</div>";
-    }
+      h+="</tbody></table>"; panel.innerHTML=h;
+    }catch(e){ document.querySelector(".panel:last-child").innerHTML="<div class='state err'>Couldn't load orders: "+esc(e.message)+"</div>"; }
   }
 
-  function showForm(show){ $("newPanel").classList.toggle("hidden",!show); if(show)$("f_date").value=todayLocal(); }
+  async function showForm(show){ $("newPanel").classList.toggle("hidden",!show); if(show){ $("f_date").value=todayLocal(); await loadAccounts(); } }
 
   $("toggleNew").addEventListener("click",()=>showForm($("newPanel").classList.contains("hidden")));
   $("cancel").addEventListener("click",()=>showForm(false));
   $("refresh").addEventListener("click",load);
-  $("tenant").addEventListener("change",()=>{ try{localStorage.setItem(TENANT_KEY,tenant());}catch(e){} load(); });
+  $("tenant").addEventListener("change",async ()=>{ try{localStorage.setItem(TENANT_KEY,tenant());}catch(e){} if(!$("newPanel").classList.contains("hidden"))await loadAccounts(); load(); });
+  wireParty("f_shipper","addr_shipper","shipper"); wireParty("f_consignee","addr_consignee","consignee"); wireParty("f_billto","addr_billto","billto");
+  $("add_shipper").addEventListener("click",()=>openNewAcct("Shipper","f_shipper","addr_shipper","shipper"));
+  $("add_consignee").addEventListener("click",()=>openNewAcct("Consignee","f_consignee","addr_consignee","consignee"));
+  $("add_billto").addEventListener("click",()=>openNewAcct("Bill-To","f_billto","addr_billto","billto"));
 
   $("create").addEventListener("click",async ()=>{
     const msg=$("msg"); msg.className="msg"; msg.textContent="";
     const customer=$("f_customer").value.trim();
     if(!customer){ msg.className="msg err"; msg.textContent="Customer is required."; return; }
-    const body={
-      id:"ORD-"+Math.random().toString(36).slice(2,8).toUpperCase(),
-      tenantId:tenant(),
-      customer:customer,
-      origin:$("f_origin").value.trim()||null,
-      dest:$("f_dest").value.trim()||null,
-      status:$("f_status").value,
-      priority:$("f_priority").value,
-      orderDate:toMDY($("f_date").value)||null,
-      driver:$("f_driver").value.trim()||null,
-      equipment:$("f_equipment").value.trim()||null,
-      rate:$("f_rate").value.trim()||null,
-      lineItems:[]
-    };
+    const body={ id:"ORD-"+Math.random().toString(36).slice(2,8).toUpperCase(), tenantId:tenant(), customer:customer,
+      origin:$("f_origin").value.trim()||null, dest:$("f_dest").value.trim()||null, status:$("f_status").value, priority:$("f_priority").value,
+      orderDate:toMDY($("f_date").value)||null, driver:$("f_driver").value.trim()||null, equipment:$("f_equipment").value.trim()||null,
+      rate:$("f_rate").value.trim()||null, shipper:picked.shipper, consignee:picked.consignee, billTo:picked.billto, lineItems:[] };
     $("create").disabled=true; $("create").textContent="Creating…";
     try{
       const res=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json","X-Tenant":tenant()},body:JSON.stringify(body)});
       if(!res.ok){ const t=await res.text(); throw new Error(t||("Error "+res.status)); }
       msg.className="msg ok"; msg.textContent="Order created.";
       ["f_customer","f_origin","f_dest","f_driver","f_equipment","f_rate"].forEach(id=>$(id).value="");
-      load();
-      setTimeout(()=>showForm(false),700);
+      load(); setTimeout(()=>showForm(false),700);
     }catch(e){ msg.className="msg err"; msg.textContent=e.message; }
     finally{ $("create").disabled=false; $("create").textContent="Create order"; }
   });
