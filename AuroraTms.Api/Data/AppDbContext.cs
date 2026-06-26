@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderLineItem> OrderLineItems => Set<OrderLineItem>();
     public DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<YardMove> YardMoves => Set<YardMove>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -108,6 +109,16 @@ public class AppDbContext : DbContext
             e.Property(x => x.Permissions).HasColumnType("jsonb");
             e.Property(x => x.Modules).HasColumnType("jsonb");
             e.Property(x => x.TerminalAccess).HasColumnType("jsonb");
+            e.HasQueryFilter(x => x.TenantId == _tenant.TenantId);
+        });
+
+        // ---- Yard move ----
+        b.Entity<YardMove>(e =>
+        {
+            e.ToTable("yard_moves");
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.TenantId);
+            e.HasIndex(x => x.TerminalId);
             e.HasQueryFilter(x => x.TenantId == _tenant.TenantId);
         });
     }
