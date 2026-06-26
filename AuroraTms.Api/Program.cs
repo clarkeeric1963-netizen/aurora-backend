@@ -81,6 +81,7 @@ using (var scope = app.Services.CreateScope())
             CONSTRAINT ""PK_yard_moves"" PRIMARY KEY (""Id"")
         );");
     db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS ""IX_yard_moves_TenantId"" ON yard_moves (""TenantId"");");
+    db.Database.ExecuteSqlRaw(@"ALTER TABLE drivers ADD COLUMN IF NOT EXISTS ""IsYardJockey"" boolean NOT NULL DEFAULT FALSE;");
     db.Database.ExecuteSqlRaw(@"
         INSERT INTO yard_moves (""Id"",""TenantId"",""TerminalId"",""Type"",""Trailer"",""FromLoc"",""ToLoc"",""Priority"",""Urgent"",""Reason"",""Manifest"",""Jockey"",""Status"",""CreatedAt"")
         VALUES
