@@ -27,7 +27,19 @@ public class AccountsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Account>> Create(Account a)
     {
+        var name = (a.Name ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(name))
+            return BadRequest(new { error = "Name is required." });
+
+        // Prevent duplicate accounts within the tenant: same name (case-insensitive) + same type.
+        // The query is automatically scoped to the current tenant by the global query filter.
+        var dup = await _db.Accounts.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && x.Type == a.Type);
+        if (dup is not null)
+            return Conflict(new { error = "An account with this name and type already exists.", existing = dup });
+
         if (string.IsNullOrWhiteSpace(a.Id)) a.Id = $"ACCT-{Guid.NewGuid().ToString()[..8]}";
+        a.Name = name;
         a.TenantId = _tenant.TenantId!;
         _db.Accounts.Add(a);
         await _db.SaveChangesAsync();
