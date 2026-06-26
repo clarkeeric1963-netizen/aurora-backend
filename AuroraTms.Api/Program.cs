@@ -5,19 +5,38 @@ using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ---------------------------------------------------------------------------
+// 1. Bind to the port Railway provides (Railway sets the PORT env var).
+// ---------------------------------------------------------------------------
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
+// ---------------------------------------------------------------------------
+// 2. Build the Npgsql connection string.
+//    Railway's Postgres plugin injects DATABASE_URL in the URI form:
+//      postgresql://user:pass@host:port/dbname
+//    Npgsql needs a key/value string, so we translate it. Locally you can set
+//    ConnectionStrings__Default instead (see appsettings.Development.json).
+// ---------------------------------------------------------------------------
 string connString = BuildConnectionString(builder.Configuration);
 
+// Per-request tenant context, read by AppDbContext's global query filters.
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connString));
 
+// ---------------------------------------------------------------------------
+// 3. Controllers, JSON, CORS, Swagger.
+// ---------------------------------------------------------------------------
 builder.Services.AddControllers().AddJsonOptions(o =>
 {
+    // Emit camelCase to match the React frontend's field names.
     o.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     o.JsonSerializerOptions.DefaultIgnoreCondition =
         System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    // Break parent/child reference loops (order -> line items -> order) so JSON doesn't throw.
+    o.JsonSerializerOptions.ReferenceHandler =
+        System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
 
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
@@ -28,6 +47,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// ---------------------------------------------------------------------------
+// 4. Create the schema and seed on first boot.
+//    For real schema versioning, swap EnsureCreated() for Migrate() after you
+//    generate migrations (see README). EnsureCreated is fine to get live fast.
+// ---------------------------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -38,21 +62,33 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// Gate the super-admin surface (/admin UI + platform registry) before anything
+// serves it. Stopgap until full auth is built.
 app.UseMiddleware<AuroraTms.Api.Security.AdminGateMiddleware>();
 
+// Serve the bundled frontend (wwwroot/index.html + assets). Static files are
+// served before tenant resolution so the UI always loads.
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseCors();
 
+// Resolve the tenant (from subdomain or X-Tenant header) on every request,
+// before any controller runs, so all DB queries are tenant-scoped.
 app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.MapControllers();
 
+// Anything not matched by an API route or a static file returns the app shell,
+// so the single-page UI loads at the domain root (and any client-side route).
 app.MapFallbackToFile("index.html");
 
 app.Run();
 
+
+// ---------------------------------------------------------------------------
+// Helper: turn DATABASE_URL (or ConnectionStrings:Default) into an Npgsql string.
+// ---------------------------------------------------------------------------
 static string BuildConnectionString(IConfiguration config)
 {
     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
@@ -68,13 +104,14 @@ static string BuildConnectionString(IConfiguration config)
             Username = Uri.UnescapeDataString(userInfo[0]),
             Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "",
             Database = uri.AbsolutePath.TrimStart('/'),
-            SslMode = SslMode.Prefer,
+            SslMode = SslMode.Prefer,           // Railway public networking uses TLS
             TrustServerCertificate = true,
             Pooling = true
         };
         return b.ConnectionString;
     }
 
+    // Fallback for local dev.
     var local = config.GetConnectionString("Default");
     if (string.IsNullOrWhiteSpace(local))
         throw new InvalidOperationException(
