@@ -69,6 +69,7 @@
   const params = new URLSearchParams(location.search);
   let TENANT = params.get("tenant") || (function(){ try{return localStorage.getItem("yard_tenant")}catch(e){return null} })() || "sefl";
   try{ localStorage.setItem("yard_tenant", TENANT); }catch(e){}
+  const JOCKEY = params.get("jockey");
 
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
   function rank(m){ if(m.urgent)return 0; const p=(m.priority||"").toLowerCase(); if(p==="high")return 1; if(p==="low")return 3; return 2; }
@@ -100,19 +101,20 @@
   async function load(){
     try{
       const all=await api("/api/yardmoves");
-      const active=all.filter(m=>m.status==="Assigned"||m.status==="In Progress");
-      const done=all.filter(m=>m.status==="Done");
+      const mine = JOCKEY ? all.filter(m=>m.jockey===JOCKEY) : all;
+      const active=mine.filter(m=>m.status==="Assigned"||m.status==="In Progress");
+      const done=mine.filter(m=>m.status==="Done");
       active.sort((a,b)=>{
         const ai=a.status==="In Progress"?0:1, bi=b.status==="In Progress"?0:1;
         if(ai!==bi)return ai-bi;
         return rank(a)-rank(b);
       });
-      $("s_assigned").textContent=all.filter(m=>m.status==="Assigned").length;
-      $("s_active").textContent=all.filter(m=>m.status==="In Progress").length;
+      $("s_assigned").textContent=mine.filter(m=>m.status==="Assigned").length;
+      $("s_active").textContent=mine.filter(m=>m.status==="In Progress").length;
       $("s_done").textContent=done.length;
-      const jockey=(all.find(m=>m.jockey)||{}).jockey;
+      const jockey=JOCKEY || (mine.find(m=>m.jockey)||{}).jockey;
       $("who").firstChild.textContent = jockey || "Jockey";
-      $("terminal").textContent = (all[0]&&all[0].terminalId)?("Terminal "+all[0].terminalId):("Tenant: "+TENANT);
+      $("terminal").textContent = (mine[0]&&mine[0].terminalId)?("Terminal "+mine[0].terminalId):("Tenant: "+TENANT);
       if(!active.length){ $("list").innerHTML="<div class='state'>&#10003; All caught up — no moves queued.</div>"+(done.length?"<div class='donerow'>"+done.length+" completed</div>":""); return; }
       $("list").innerHTML=active.map(card).join("")+(done.length?"<div class='donerow'>"+done.length+" completed today</div>":"");
     }catch(e){ $("list").innerHTML="<div class='state err'>Couldn't load moves: "+esc(e.message)+"</div>"; }
