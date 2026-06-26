@@ -56,6 +56,39 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    // EnsureCreated() doesn't add new tables to an already-existing database.
+    // Create the yard_moves table if it's missing (so we don't lose existing data),
+    // then seed a few demo moves. Idempotent.
+    db.Database.ExecuteSqlRaw(@"
+        CREATE TABLE IF NOT EXISTS yard_moves (
+            ""Id"" text NOT NULL,
+            ""TenantId"" text NOT NULL,
+            ""TerminalId"" text NULL,
+            ""Type"" text NULL,
+            ""Trailer"" text NULL,
+            ""FromLoc"" text NULL,
+            ""ToLoc"" text NULL,
+            ""Priority"" text NULL,
+            ""Urgent"" boolean NOT NULL DEFAULT FALSE,
+            ""Reason"" text NULL,
+            ""Manifest"" text NULL,
+            ""Jockey"" text NULL,
+            ""Status"" text NOT NULL DEFAULT 'Assigned',
+            ""CreatedAt"" text NULL,
+            ""StartedAt"" text NULL,
+            ""CompletedAt"" text NULL,
+            CONSTRAINT ""PK_yard_moves"" PRIMARY KEY (""Id"")
+        );");
+    db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS ""IX_yard_moves_TenantId"" ON yard_moves (""TenantId"");");
+    db.Database.ExecuteSqlRaw(@"
+        INSERT INTO yard_moves (""Id"",""TenantId"",""TerminalId"",""Type"",""Trailer"",""FromLoc"",""ToLoc"",""Priority"",""Urgent"",""Reason"",""Manifest"",""Jockey"",""Status"",""CreatedAt"")
+        VALUES
+        ('YM-0001','CUS-0001','TRM-001','Spot','TRL-9903','Lot B-4','Door D-07','High',TRUE,'ORL-012 arrived - strip 3 orders','ORL-012','Marcus Johnson','Assigned', now()::text),
+        ('YM-0002','CUS-0001','TRM-001','Pull','TRL-7001','Door D-03','Lot C-1','Normal',FALSE,'Fluid sealed at cut time - stage for dispatch','ORL-010','Marcus Johnson','Assigned', now()::text),
+        ('YM-0003','CUS-0001','TRM-001','Spot','TRL-EMPTY-04','Lot D-2','Door D-09','Normal',FALSE,'New MIA manifest - empty trailer needed','NEW','Marcus Johnson','Assigned', now()::text)
+        ON CONFLICT (""Id"") DO NOTHING;");
+
     DbSeeder.Seed(db);
 }
 
