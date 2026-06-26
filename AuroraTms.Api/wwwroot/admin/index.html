@@ -116,6 +116,7 @@
     const company = $("company").value.trim();
     if (!company) { msg.className = "msg err"; msg.textContent = "Company name is required."; return; }
     const body = {
+      id: "CUS-" + Math.random().toString(36).slice(2, 10),
       company: company,
       subdomain: $("subdomain").value.trim().toLowerCase() || null,
       tier: $("tier").value,
