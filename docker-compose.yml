@@ -1,0 +1,38 @@
+# Run the whole stack locally to test before deploying to Railway:
+#   docker compose up --build
+# Then open http://localhost:8080/swagger
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aurora
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # Mirrors the DATABASE_URL Railway injects, so Program.cs takes the same path.
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/aurora"
+      PORT: "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
