@@ -50,6 +50,7 @@ public class Driver
     public string? Mvr { get; set; }
     public bool TwicCard { get; set; }
     public bool Hazmat { get; set; }
+    public bool IsYardJockey { get; set; }
     public int AccidentCount { get; set; }
     public string? Notes { get; set; }
 
