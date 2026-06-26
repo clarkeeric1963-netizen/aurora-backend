@@ -8,6 +8,10 @@ namespace AuroraTms.Api.Models;
 public class Terminal
 {
     public string Id { get; set; } = default!;          // e.g. "TRM-001"
+
+    /// <summary>Owning tenant (Customers.Id). Auto-set on create; enforced on every query.</summary>
+    public string TenantId { get; set; } = default!;
+
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;        // e.g. "ORL"
     public double? Lat { get; set; }

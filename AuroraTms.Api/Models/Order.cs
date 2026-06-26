@@ -8,6 +8,10 @@ namespace AuroraTms.Api.Models;
 public class Order
 {
     public string Id { get; set; } = default!;          // e.g. "ORL-10018"
+
+    /// <summary>Owning tenant (Customers.Id). Auto-set on create; enforced on every query.</summary>
+    public string TenantId { get; set; } = default!;
+
     public string? Customer { get; set; }
     public string? Origin { get; set; }
     public string? Dest { get; set; }

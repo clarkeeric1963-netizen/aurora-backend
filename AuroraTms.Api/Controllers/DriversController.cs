@@ -1,5 +1,6 @@
 using AuroraTms.Api.Data;
 using AuroraTms.Api.Models;
+using AuroraTms.Api.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,8 @@ namespace AuroraTms.Api.Controllers;
 public class DriversController : ControllerBase
 {
     private readonly AppDbContext _db;
-    public DriversController(AppDbContext db) => _db = db;
+    private readonly ITenantProvider _tenant;
+    public DriversController(AppDbContext db, ITenantProvider tenant) { _db = db; _tenant = tenant; }
 
     [HttpGet]
     public async Task<IEnumerable<Driver>> List([FromQuery] string? terminal)
@@ -24,7 +26,7 @@ public class DriversController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Driver>> Get(string id)
     {
-        var d = await _db.Drivers.FindAsync(id);
+        var d = await _db.Drivers.FirstOrDefaultAsync(x => x.Id == id);
         return d is null ? NotFound() : d;
     }
 
@@ -32,6 +34,7 @@ public class DriversController : ControllerBase
     public async Task<ActionResult<Driver>> Create(Driver d)
     {
         if (string.IsNullOrWhiteSpace(d.Id)) d.Id = $"DRV-{Guid.NewGuid().ToString()[..8]}";
+        d.TenantId = _tenant.TenantId!;            // stamp owning tenant
         _db.Drivers.Add(d);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = d.Id }, d);
@@ -40,9 +43,11 @@ public class DriversController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, Driver input)
     {
-        if (!await _db.Drivers.AnyAsync(x => x.Id == id)) return NotFound();
+        var existing = await _db.Drivers.FirstOrDefaultAsync(x => x.Id == id);
+        if (existing is null) return NotFound();
         input.Id = id;
-        _db.Entry(input).State = EntityState.Modified;
+        input.TenantId = existing.TenantId;        // tenant can't be reassigned
+        _db.Entry(existing).CurrentValues.SetValues(input);
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -50,7 +55,7 @@ public class DriversController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        var d = await _db.Drivers.FindAsync(id);
+        var d = await _db.Drivers.FirstOrDefaultAsync(x => x.Id == id);
         if (d is null) return NotFound();
         _db.Drivers.Remove(d);
         await _db.SaveChangesAsync();

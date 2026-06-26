@@ -8,6 +8,10 @@ namespace AuroraTms.Api.Models;
 public class Account
 {
     public string Id { get; set; } = default!;          // e.g. "ACCT-1001"
+
+    /// <summary>Owning tenant (Customers.Id). Auto-set on create; enforced on every query.</summary>
+    public string TenantId { get; set; } = default!;
+
     public string Name { get; set; } = default!;
     public string? Type { get; set; }                   // Shipper | Consignee | Bill-To
     public string? Address { get; set; }

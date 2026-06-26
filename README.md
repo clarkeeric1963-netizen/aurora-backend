@@ -123,11 +123,21 @@ railway domain          # generate a public domain
 
 ---
 
-## C. Connect the frontend
+## C. The frontend (bundled)
 
-See `frontend/WIRING.md`. In short: include `aurora-api.js`, set
-`window.AURORA_API_BASE` to your Railway domain, and swap the UI's seed arrays
-for `AuroraAPI.<resource>.list()` calls. You can migrate one screen at a time.
+The app UI is bundled into the API at `AuroraTms.Api/wwwroot/index.html` and
+served from the same place as the API. Visiting the service root loads the app;
+its data calls go to `/api/...` on the same host, so on a tenant subdomain
+(`sefl.auroratms.com`) the tenant is detected automatically — no config needed.
+
+The UI ships with the app's built-in demo data. Connecting each screen to the
+live database is a separate, incremental step — see `frontend/WIRING.md`. To wire
+a screen, swap its seed array for an `AuroraAPI.<resource>.list()` call; the
+client (`/aurora-api.js`) is already loaded and points at the same origin.
+
+To test a specific tenant on the plain Railway URL (which has no subdomain), open
+the browser console on the app and run `window.AURORA_TENANT = "sefl"` before the
+screen loads, or just use `./smoke-test.sh` against the API.
 
 ---
 

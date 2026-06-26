@@ -5,6 +5,11 @@
  *   <script>window.AURORA_API_BASE = "https://your-service.up.railway.app";</script>
  *   <script src="aurora-api.js"></script>
  *
+ * MULTI-TENANT: which tenant you act as is normally taken from the subdomain
+ * (e.g. greenfield.yourcompany.com). For TESTING on the plain Railway URL (which
+ * has no tenant subdomain), set a tenant slug and the client sends it as a header:
+ *   <script>window.AURORA_TENANT = "sefl";</script>   // or "gulfstates", etc.
+ *
  * Then in React code, replace in-memory seed arrays with live calls, e.g.:
  *   const [orders, setOrders] = useState([]);
  *   useEffect(() => { AuroraAPI.orders.list().then(setOrders); }, []);
@@ -13,9 +18,11 @@
   const BASE = (window.AURORA_API_BASE || "http://localhost:8080").replace(/\/$/, "");
 
   async function req(method, path, body) {
+    const headers = { "Content-Type": "application/json" };
+    if (window.AURORA_TENANT) headers["X-Tenant"] = window.AURORA_TENANT; // testing only
     const res = await fetch(BASE + path, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: body ? JSON.stringify(body) : undefined,
     });
     if (!res.ok) {

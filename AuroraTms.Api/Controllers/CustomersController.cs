@@ -26,6 +26,7 @@ public class CustomersController : ControllerBase
     public async Task<ActionResult<Customer>> Create(Customer c)
     {
         if (string.IsNullOrWhiteSpace(c.Id)) c.Id = $"CUS-{Guid.NewGuid().ToString()[..8]}";
+        if (!string.IsNullOrWhiteSpace(c.Subdomain)) c.Subdomain = c.Subdomain.Trim().ToLowerInvariant();
         _db.Customers.Add(c);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = c.Id }, c);

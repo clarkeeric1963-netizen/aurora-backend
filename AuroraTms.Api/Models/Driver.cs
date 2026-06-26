@@ -8,6 +8,10 @@ namespace AuroraTms.Api.Models;
 public class Driver
 {
     public string Id { get; set; } = default!;          // e.g. "DRV-2001"
+
+    /// <summary>Owning tenant (Customers.Id). Auto-set on create; enforced on every query.</summary>
+    public string TenantId { get; set; } = default!;
+
     public string Name { get; set; } = default!;
     public string? FirstName { get; set; }
     public string? LastName { get; set; }

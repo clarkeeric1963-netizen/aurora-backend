@@ -1,5 +1,6 @@
 using AuroraTms.Api.Data;
 using AuroraTms.Api.Models;
+using AuroraTms.Api.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,8 @@ namespace AuroraTms.Api.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly AppDbContext _db;
-    public OrdersController(AppDbContext db) => _db = db;
+    private readonly ITenantProvider _tenant;
+    public OrdersController(AppDbContext db, ITenantProvider tenant) { _db = db; _tenant = tenant; }
 
     [HttpGet]
     public async Task<IEnumerable<Order>> List([FromQuery] string? status, [FromQuery] string? customer)
@@ -32,7 +34,8 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult<Order>> Create(Order o)
     {
         if (string.IsNullOrWhiteSpace(o.Id)) o.Id = $"ORD-{Guid.NewGuid().ToString()[..8]}";
-        foreach (var li in o.LineItems) li.OrderId = o.Id;
+        o.TenantId = _tenant.TenantId!;            // stamp owning tenant
+        foreach (var li in o.LineItems) { li.Id = 0; li.OrderId = o.Id; }
         _db.Orders.Add(o);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = o.Id }, o);
@@ -44,11 +47,12 @@ public class OrdersController : ControllerBase
         var existing = await _db.Orders.Include(x => x.LineItems).FirstOrDefaultAsync(x => x.Id == id);
         if (existing is null) return NotFound();
 
-        // scalar + jsonb fields
+        // Align key + tenant before copying, so neither can be changed by the body.
+        input.Id = id;
+        input.TenantId = existing.TenantId;
         _db.Entry(existing).CurrentValues.SetValues(input);
-        existing.Id = id;
 
-        // replace line items
+        // Replace line items.
         _db.OrderLineItems.RemoveRange(existing.LineItems);
         existing.LineItems = input.LineItems;
         foreach (var li in existing.LineItems) { li.Id = 0; li.OrderId = id; }
@@ -60,7 +64,7 @@ public class OrdersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        var o = await _db.Orders.FindAsync(id);
+        var o = await _db.Orders.FirstOrDefaultAsync(x => x.Id == id);
         if (o is null) return NotFound();
         _db.Orders.Remove(o);
         await _db.SaveChangesAsync();

@@ -1,5 +1,6 @@
 using AuroraTms.Api.Data;
 using AuroraTms.Api.Models;
+using AuroraTms.Api.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,8 @@ namespace AuroraTms.Api.Controllers;
 public class AccountsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    public AccountsController(AppDbContext db) => _db = db;
+    private readonly ITenantProvider _tenant;
+    public AccountsController(AppDbContext db, ITenantProvider tenant) { _db = db; _tenant = tenant; }
 
     [HttpGet]
     public async Task<IEnumerable<Account>> List() => await _db.Accounts.AsNoTracking().ToListAsync();
@@ -18,7 +20,7 @@ public class AccountsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Account>> Get(string id)
     {
-        var a = await _db.Accounts.FindAsync(id);
+        var a = await _db.Accounts.FirstOrDefaultAsync(x => x.Id == id);
         return a is null ? NotFound() : a;
     }
 
@@ -26,6 +28,7 @@ public class AccountsController : ControllerBase
     public async Task<ActionResult<Account>> Create(Account a)
     {
         if (string.IsNullOrWhiteSpace(a.Id)) a.Id = $"ACCT-{Guid.NewGuid().ToString()[..8]}";
+        a.TenantId = _tenant.TenantId!;
         _db.Accounts.Add(a);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = a.Id }, a);
@@ -34,9 +37,11 @@ public class AccountsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, Account input)
     {
-        if (!await _db.Accounts.AnyAsync(x => x.Id == id)) return NotFound();
+        var existing = await _db.Accounts.FirstOrDefaultAsync(x => x.Id == id);
+        if (existing is null) return NotFound();
         input.Id = id;
-        _db.Entry(input).State = EntityState.Modified;
+        input.TenantId = existing.TenantId;
+        _db.Entry(existing).CurrentValues.SetValues(input);
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -44,7 +49,7 @@ public class AccountsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        var a = await _db.Accounts.FindAsync(id);
+        var a = await _db.Accounts.FirstOrDefaultAsync(x => x.Id == id);
         if (a is null) return NotFound();
         _db.Accounts.Remove(a);
         await _db.SaveChangesAsync();

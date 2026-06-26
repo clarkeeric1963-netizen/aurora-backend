@@ -1,4 +1,5 @@
 using AuroraTms.Api.Data;
+using AuroraTms.Api.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -18,6 +19,9 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 //    ConnectionStrings__Default instead (see appsettings.Development.json).
 // ---------------------------------------------------------------------------
 string connString = BuildConnectionString(builder.Configuration);
+
+// Per-request tenant context, read by AppDbContext's global query filters.
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connString));
 
@@ -54,8 +58,23 @@ using (var scope = app.Services.CreateScope())
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// Serve the bundled frontend (wwwroot/index.html + assets). Static files are
+// served before tenant resolution so the UI always loads.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseCors();
+
+// Resolve the tenant (from subdomain or X-Tenant header) on every request,
+// before any controller runs, so all DB queries are tenant-scoped.
+app.UseMiddleware<TenantResolutionMiddleware>();
+
 app.MapControllers();
+
+// Anything not matched by an API route or a static file returns the app shell,
+// so the single-page UI loads at the domain root (and any client-side route).
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

@@ -1,5 +1,6 @@
 using AuroraTms.Api.Data;
 using AuroraTms.Api.Models;
+using AuroraTms.Api.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,8 @@ namespace AuroraTms.Api.Controllers;
 public class TerminalsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    public TerminalsController(AppDbContext db) => _db = db;
+    private readonly ITenantProvider _tenant;
+    public TerminalsController(AppDbContext db, ITenantProvider tenant) { _db = db; _tenant = tenant; }
 
     [HttpGet]
     public async Task<IEnumerable<Terminal>> List() => await _db.Terminals.AsNoTracking().ToListAsync();
@@ -18,7 +20,7 @@ public class TerminalsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Terminal>> Get(string id)
     {
-        var t = await _db.Terminals.FindAsync(id);
+        var t = await _db.Terminals.FirstOrDefaultAsync(x => x.Id == id);
         return t is null ? NotFound() : t;
     }
 
@@ -26,6 +28,7 @@ public class TerminalsController : ControllerBase
     public async Task<ActionResult<Terminal>> Create(Terminal t)
     {
         if (string.IsNullOrWhiteSpace(t.Id)) t.Id = $"TRM-{Guid.NewGuid().ToString()[..8]}";
+        t.TenantId = _tenant.TenantId!;
         _db.Terminals.Add(t);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(Get), new { id = t.Id }, t);
@@ -34,9 +37,11 @@ public class TerminalsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, Terminal input)
     {
-        if (!await _db.Terminals.AnyAsync(x => x.Id == id)) return NotFound();
+        var existing = await _db.Terminals.FirstOrDefaultAsync(x => x.Id == id);
+        if (existing is null) return NotFound();
         input.Id = id;
-        _db.Entry(input).State = EntityState.Modified;
+        input.TenantId = existing.TenantId;
+        _db.Entry(existing).CurrentValues.SetValues(input);
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -44,7 +49,7 @@ public class TerminalsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        var t = await _db.Terminals.FindAsync(id);
+        var t = await _db.Terminals.FirstOrDefaultAsync(x => x.Id == id);
         if (t is null) return NotFound();
         _db.Terminals.Remove(t);
         await _db.SaveChangesAsync();

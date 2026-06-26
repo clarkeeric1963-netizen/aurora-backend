@@ -9,6 +9,9 @@ public class Customer
 {
     public string Id { get; set; } = default!;          // e.g. "CUS-0001"
     public string Company { get; set; } = default!;
+
+    /// <summary>The tenant's subdomain slug, e.g. "greenfield" for greenfield.yourcompany.com. Unique.</summary>
+    public string? Subdomain { get; set; }
     public string? Contact { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
