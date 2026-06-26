@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aurora TMS — Accounts</title>
+<style>
+  :root{--blue:#2563eb;--cyan:#0e7490;--bg:#eef1f5;--card:#fff;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--input:#f1f5f9;--ok:#059669}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  .bar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+  .brand{font-weight:800}.brand span{color:var(--muted);font-weight:600}
+  .nav{display:flex;gap:14px;margin-left:18px}
+  .nav a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+  .nav a.active{color:var(--blue)}
+  .tenantbox{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .tenantbox label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  select,input{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--input);font-size:13px;font-family:inherit;color:var(--text)}
+  select:focus,input:focus{outline:none;border-color:var(--blue)}
+  .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+  .head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  h2{font-size:17px;font-weight:800}.count{font-size:12px;color:var(--muted);font-weight:600}
+  .spacer{margin-left:auto}
+  .btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text)}
+  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn:disabled{opacity:.5}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
+  .form{padding:18px}.form h3{font-size:14px;font-weight:800;margin-bottom:14px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .field input,.field select{width:100%}
+  .actions{display:flex;align-items:center;gap:10px;margin-top:16px}
+  .msg{font-size:13px;font-weight:600;min-height:18px}.msg.ok{color:var(--ok)}.msg.err{color:#dc2626}
+  .hidden{display:none}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);background:#f8fafc}
+  tr:last-child td{border-bottom:none}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#e0e7ff;color:#3730a3}
+  .state{padding:40px;text-align:center;color:var(--muted);font-size:14px}.state.err{color:#dc2626}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="logo">A</div>
+  <div class="brand">Aurora TMS <span>· Accounts</span></div>
+  <div class="nav"><a href="/orders.html">Orders</a><a href="/accounts.html" class="active">Accounts</a></div>
+  <div class="tenantbox">
+    <label for="tenant">Tenant</label>
+    <select id="tenant">
+      <option value="sefl">sefl — Southeastern Freight Lines</option>
+      <option value="gulfstates">gulfstates — Gulf States Logistics</option>
+    </select>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <h2>Accounts</h2><span class="count" id="count"></span>
+    <div class="spacer"></div>
+    <button class="btn primary" id="toggleNew">+ New account</button>
+    <button class="btn" id="refresh">Refresh</button>
+  </div>
+
+  <div class="panel hidden" id="newPanel">
+    <div class="form">
+      <h3>New account</h3>
+      <div class="grid">
+        <div class="field"><label>Name</label><input id="f_name" placeholder="Acme Distribution" /></div>
+        <div class="field"><label>Type</label>
+          <select id="f_type"><option>Shipper</option><option>Consignee</option><option>Bill-To</option><option>Customer</option></select>
+        </div>
+        <div class="field"><label>Contact</label><input id="f_contact" placeholder="Jane Smith" /></div>
+        <div class="field"><label>Address</label><input id="f_address" placeholder="123 Main St" /></div>
+        <div class="field"><label>Address 2</label><input id="f_address2" placeholder="Suite 100" /></div>
+        <div class="field"><label>City</label><input id="f_city" placeholder="Atlanta" /></div>
+        <div class="field"><label>State</label><input id="f_state" placeholder="GA" /></div>
+        <div class="field"><label>Zip</label><input id="f_zip" placeholder="30301" /></div>
+        <div class="field"><label>Country</label><input id="f_country" value="US" /></div>
+        <div class="field"><label>Main phone</label><input id="f_phone" placeholder="(404) 555-0100" /></div>
+        <div class="field"><label>Email</label><input id="f_email" placeholder="ops@acme.com" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="create">Create account</button>
+        <button class="btn" id="cancel">Cancel</button>
+        <span class="msg" id="msg"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel"><div class="state" id="state">Loading…</div></div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const TENANT_KEY = "aurora_tenant_demo";
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
+  function tenant(){ return $("tenant").value; }
+
+  async function load(){
+    $("count").textContent="";
+    document.querySelector(".panel:last-child").innerHTML="<div class='state'>Loading…</div>";
+    try{
+      const res=await fetch("/api/accounts",{headers:{"X-Tenant":tenant()}});
+      if(!res.ok)throw new Error("Server returned "+res.status);
+      const rows=await res.json();
+      $("count").textContent=rows.length+" account"+(rows.length===1?"":"s")+" · tenant: "+tenant();
+      const panel=document.querySelector(".panel:last-child");
+      if(!rows.length){panel.innerHTML="<div class='state'>No accounts yet. Add one above.</div>";return;}
+      let h="<table><thead><tr><th>Name</th><th>Type</th><th>City / State</th><th>Phone</th><th>Contact</th></tr></thead><tbody>";
+      for(const a of rows){
+        const loc=[a.city,a.state].filter(Boolean).join(", ")||"—";
+        h+="<tr><td><b>"+esc(a.name)+"</b></td><td><span class='tag'>"+esc(a.type||"—")+"</span></td><td>"+esc(loc)+"</td><td>"+esc(a.mainPhone||"—")+"</td><td>"+esc(a.contact||"—")+"</td></tr>";
+      }
+      h+="</tbody></table>"; panel.innerHTML=h;
+    }catch(e){ document.querySelector(".panel:last-child").innerHTML="<div class='state err'>Couldn't load accounts: "+esc(e.message)+"</div>"; }
+  }
+
+  function showForm(show){ $("newPanel").classList.toggle("hidden",!show); }
+  $("toggleNew").addEventListener("click",()=>showForm($("newPanel").classList.contains("hidden")));
+  $("cancel").addEventListener("click",()=>showForm(false));
+  $("refresh").addEventListener("click",load);
+  $("tenant").addEventListener("change",()=>{ try{localStorage.setItem(TENANT_KEY,tenant());}catch(e){} load(); });
+
+  $("create").addEventListener("click",async ()=>{
+    const msg=$("msg"); msg.className="msg"; msg.textContent="";
+    const name=$("f_name").value.trim();
+    if(!name){ msg.className="msg err"; msg.textContent="Name is required."; return; }
+    const body={
+      id:"ACCT-"+Math.random().toString(36).slice(2,8).toUpperCase(),
+      tenantId:tenant(), name:name, type:$("f_type").value,
+      contact:$("f_contact").value.trim()||null, address:$("f_address").value.trim()||null,
+      address2:$("f_address2").value.trim()||null, city:$("f_city").value.trim()||null,
+      state:$("f_state").value.trim()||null, zip:$("f_zip").value.trim()||null,
+      country:$("f_country").value.trim()||null, mainPhone:$("f_phone").value.trim()||null,
+      email:$("f_email").value.trim()||null
+    };
+    $("create").disabled=true; $("create").textContent="Creating…";
+    try{
+      const res=await fetch("/api/accounts",{method:"POST",headers:{"Content-Type":"application/json","X-Tenant":tenant()},body:JSON.stringify(body)});
+      if(res.status===409){ const d=await res.json().catch(()=>({})); msg.className="msg err"; msg.textContent=d.error||"An account with this name and type already exists."; return; }
+      if(!res.ok){ const t=await res.text(); throw new Error(t||("Error "+res.status)); }
+      msg.className="msg ok"; msg.textContent="Account created.";
+      ["f_name","f_contact","f_address","f_address2","f_city","f_state","f_zip","f_phone","f_email"].forEach(id=>$(id).value="");
+      load(); setTimeout(()=>showForm(false),700);
+    }catch(e){ msg.className="msg err"; msg.textContent=e.message; }
+    finally{ $("create").disabled=false; $("create").textContent="Create account"; }
+  });
+
+  try{const t=localStorage.getItem(TENANT_KEY); if(t)$("tenant").value=t;}catch(e){}
+  load();
+</script>
+</body>
+</html>
