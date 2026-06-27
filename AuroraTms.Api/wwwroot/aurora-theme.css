@@ -1,0 +1,77 @@
+/* Aurora TMS shared theme — design language extracted from the demo (v4.0).
+   Link this on any screen: <link rel="stylesheet" href="/aurora-theme.css">
+   Then use the variables and .a-* component classes for a consistent demo look. */
+
+:root {
+  /* Navy / slate base */
+  --navy-900:#0f172a; --navy-800:#1e293b; --navy-700:#1e3a5f;
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0;
+  --slate-300:#cbd5e1; --slate-400:#94a3b8; --slate-500:#64748b; --slate-600:#475569;
+
+  /* Accent system */
+  --blue:#3b82f6; --blue-600:#2563eb; --blue-800:#1e40af;
+  --amber:#f59e0b; --orange:#f97316;
+  --green:#22c55e; --green-600:#16a34a; --green-700:#15803d; --emerald:#10b981;
+  --purple:#8b5cf6; --purple-500:#a855f7; --pink:#ec4899;
+  --red:#ef4444; --cyan:#06b6d4; --sky:#0ea5e9;
+
+  /* Semantic roles */
+  --bg:var(--slate-100); --card:#fff; --border:var(--slate-200);
+  --text:var(--navy-900); --muted:var(--slate-500);
+  --accent:var(--blue-600);
+
+  /* Shape & depth (the demo uses soft rounding + subtle shadows) */
+  --radius:10px; --radius-lg:14px;
+  --shadow:0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04);
+  --shadow-md:0 4px 12px rgba(15,23,42,.10);
+  --shadow-lg:0 10px 25px rgba(15,23,42,.12);
+
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+body.a { font-family:var(--font); background:var(--bg); color:var(--text); }
+
+/* Cards */
+.a-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow); }
+.a-card:hover { box-shadow:var(--shadow-md); }
+
+/* Buttons */
+.a-btn { display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border:1px solid var(--border);
+  border-radius:var(--radius); background:var(--card); color:var(--text); font-size:14px; font-weight:600;
+  font-family:inherit; cursor:pointer; transition:all .15s; }
+.a-btn:hover { border-color:var(--slate-300); box-shadow:var(--shadow); }
+.a-btn-primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.a-btn-primary:hover { background:var(--blue-800); border-color:var(--blue-800); }
+.a-btn:disabled { opacity:.55; cursor:default; }
+
+/* Inputs */
+.a-input, .a-select { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius);
+  background:var(--slate-50); font-size:14px; font-family:inherit; color:var(--text); }
+.a-input:focus, .a-select:focus { outline:none; border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+
+/* Tables */
+.a-table { width:100%; border-collapse:collapse; font-size:14px; }
+.a-table th { text-align:left; padding:11px 14px; font-size:11px; font-weight:800; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); background:var(--slate-50); }
+.a-table td { padding:12px 14px; border-bottom:1px solid var(--slate-100); }
+.a-table tr:hover td { background:var(--slate-50); }
+
+/* Badges */
+.a-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700; }
+.a-badge-blue{background:#dbeafe;color:#1e40af} .a-badge-green{background:#dcfce7;color:#15803d}
+.a-badge-amber{background:#fef3c7;color:#92400e} .a-badge-red{background:#fee2e2;color:#991b1b}
+.a-badge-purple{background:#f3e8ff;color:#6b21a8} .a-badge-gray{background:var(--slate-100);color:var(--slate-600)}
+
+/* Surfaces */
+.a-topbar { display:flex; align-items:center; gap:12px; padding:12px 20px; background:var(--card); border-bottom:1px solid var(--border); }
+.a-sidebar { background:linear-gradient(180deg,var(--navy-900),var(--navy-800)); color:var(--slate-300); }
+.a-logo { width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,var(--blue),var(--cyan));
+  display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; flex-shrink:0; }
+
+/* Colored icon squares (the demo's accent-tile look) */
+.a-ico { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:800; font-size:15px; flex-shrink:0; }
+.a-ico-blue{background:var(--blue)} .a-ico-purple{background:var(--purple)} .a-ico-amber{background:var(--amber)}
+.a-ico-green{background:var(--green)} .a-ico-cyan{background:var(--cyan)} .a-ico-orange{background:var(--orange)}
+.a-ico-pink{background:var(--pink)} .a-ico-emerald{background:var(--emerald)} .a-ico-red{background:var(--red)}
