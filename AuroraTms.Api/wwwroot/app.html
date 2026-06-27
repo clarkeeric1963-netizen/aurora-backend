@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aurora TMS</title>
+<style>
+  :root{--blue:#2563eb;--cyan:#0e7490;--bg:#eef1f5;--card:#fff;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--side:#0f172a;--sidetext:#cbd5e1;--yellow:#f59e0b;--yellowbg:#fef3c7}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
+  .side{width:240px;background:var(--side);color:var(--sidetext);display:flex;flex-direction:column;flex-shrink:0}
+  .side .top{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #1e293b}
+  .logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+  .side .top b{font-weight:800;color:#fff;font-size:15px}
+  .nav{flex:1;overflow-y:auto;padding:10px 0}
+  .navitem{display:flex;align-items:center;gap:10px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;color:var(--sidetext);border:none;background:none;width:100%;text-align:left;font-family:inherit}
+  .navitem:hover{background:#1e293b;color:#fff}
+  .navitem.active{background:#1e293b;color:#fff;box-shadow:inset 3px 0 0 var(--blue)}
+  .navitem .dot{margin-left:auto;width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .navitem .dot.yellow{background:var(--yellow)}
+  .navitem.notbuilt{color:#64748b}
+  .seclabel{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#475569;padding:14px 18px 6px}
+  .legend{padding:12px 18px;border-top:1px solid #1e293b;font-size:11px;color:#64748b;line-height:1.6}
+  .legend .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--yellow);margin-right:5px}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .mbar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border)}
+  .brand{font-weight:800}.brand span{color:var(--muted);font-weight:600}
+  .content{flex:1;overflow:auto;position:relative}
+  iframe{width:100%;height:100%;border:none;display:none;background:#fff}
+  iframe.show{display:block}
+  .home{padding:24px;display:none}.home.show{display:block}
+  .home h1{font-size:20px;font-weight:800;margin-bottom:4px}
+  .home .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .tile{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;border-left:4px solid var(--yellow)}
+  .tile.clear{border-left-color:#22c55e}
+  .tile:hover{box-shadow:0 2px 10px rgba(0,0,0,.06)}
+  .tile .tname{font-size:15px;font-weight:700}
+  .tile .tstat{font-size:12px;margin-top:6px;font-weight:600}
+  .tile .tstat.warn{color:#b45309}.tile .tstat.none{color:var(--muted)}.tile .tstat.ok{color:#15803d}
+  .placeholder{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--muted);padding:40px}
+  .placeholder.show{display:flex}
+  .placeholder .big{font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px}
+  .pill{display:inline-block;margin-top:14px;padding:4px 12px;border-radius:20px;background:var(--yellowbg);color:#92400e;font-size:12px;font-weight:700}
+</style>
+</head>
+<body>
+  <div class="side">
+    <div class="top"><div class="logo">A</div><b>Aurora TMS</b></div>
+    <div class="nav" id="nav"></div>
+    <div class="legend"><span class="dot"></span>Yellow = needs build or sign-off.<br>Cleared when you say it's good.</div>
+  </div>
+  <div class="main">
+    <div class="mbar"><div class="brand">Aurora TMS <span id="secname">· Home</span></div></div>
+    <div class="content">
+      <div class="home show" id="home">
+        <h1>Welcome back</h1>
+        <div class="sub">Your connected workspace. Yellow sections still need building or sign-off.</div>
+        <div class="tiles" id="tiles"></div>
+      </div>
+      <iframe id="frame" title="Section"></iframe>
+      <div class="placeholder" id="ph">
+        <div class="big" id="phname">Not built yet</div>
+        <div>This section is on the roadmap but hasn't been built yet.</div>
+        <div class="pill">Coming soon</div>
+      </div>
+    </div>
+  </div>
+
+<script src="/version-badge.js"></script>
+<script>
+  /* Build status. To CLEAR a section's yellow, set cleared:true (only when Eric says so). */
+  const SECTIONS = [
+    { id:"home",     label:"Home",            type:"home" },
+    { id:"orders",   label:"Orders",          url:"/orders.html",      built:true,  cleared:false, group:"Operations" },
+    { id:"accounts", label:"Accounts",        url:"/accounts.html",    built:true,  cleared:false, group:"Operations" },
+    { id:"yard",     label:"Yard app",        url:"/yard.html",        built:true,  cleared:false, group:"Operations" },
+    { id:"users",    label:"Users & roles",   url:"/admin/users.html", built:true,  cleared:false, group:"Admin" },
+    { id:"loads",    label:"Loads / shipments", built:false, cleared:false, group:"Not built yet" },
+    { id:"dispatch", label:"Dispatch",        built:false, cleared:false, group:"Not built yet" },
+    { id:"invoicing",label:"Invoicing",       built:false, cleared:false, group:"Not built yet" },
+    { id:"reports",  label:"Reports",         built:false, cleared:false, group:"Not built yet" },
+    { id:"fuel",     label:"Fuel surcharge",  built:false, cleared:false, group:"Not built yet" }
+  ];
+  const $ = id => document.getElementById(id);
+  const frame=$("frame"), home=$("home"), ph=$("ph");
+
+  function show(which){ home.classList.toggle("show",which==="home"); frame.classList.toggle("show",which==="frame"); ph.classList.toggle("show",which==="ph"); }
+
+  function select(s, el){
+    document.querySelectorAll(".navitem").forEach(n=>n.classList.remove("active"));
+    if(el) el.classList.add("active");
+    $("secname").textContent="· "+s.label;
+    if(s.type==="home"){ show("home"); return; }
+    if(s.built){ if(frame.src!==location.origin+s.url) frame.src=s.url; show("frame"); }
+    else { $("phname").textContent=s.label; show("ph"); }
+  }
+
+  function buildNav(){
+    const nav=$("nav"); let lastGroup=null;
+    SECTIONS.forEach(s=>{
+      if(s.group && s.group!==lastGroup){ const lab=document.createElement("div"); lab.className="seclabel"; lab.textContent=s.group; nav.appendChild(lab); lastGroup=s.group; }
+      const b=document.createElement("button");
+      b.className="navitem"+(s.built===false?" notbuilt":"");
+      b.innerHTML="<span>"+s.label+"</span>";
+      if(s.type!=="home" && !s.cleared){ const d=document.createElement("span"); d.className="dot yellow"; d.title="Needs build or sign-off"; b.appendChild(d); }
+      b.onclick=()=>select(s,b);
+      nav.appendChild(b);
+      if(s.type==="home") b.classList.add("active");
+    });
+  }
+
+  function buildTiles(){
+    const t=$("tiles");
+    SECTIONS.filter(s=>s.type!=="home").forEach(s=>{
+      const tile=document.createElement("div"); tile.className="tile"+(s.cleared?" clear":"");
+      let stat,cls;
+      if(!s.built){ stat="Not built yet"; cls="none"; }
+      else if(s.cleared){ stat="Live · signed off"; cls="ok"; }
+      else { stat="Built · needs testing/sign-off"; cls="warn"; }
+      tile.innerHTML="<div class='tname'>"+s.label+"</div><div class='tstat "+cls+"'>"+stat+"</div>";
+      tile.onclick=()=>{ const el=[...document.querySelectorAll(".navitem")].find(n=>n.textContent.trim().startsWith(s.label)); select(s, el); };
+      t.appendChild(tile);
+    });
+  }
+
+  buildNav(); buildTiles();
+</script>
+</body>
+</html>

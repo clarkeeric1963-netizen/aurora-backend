@@ -1,9 +1,10 @@
 {
   "app": "Aurora TMS",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "built": "2026-06-27",
   "stage": "prototype",
   "changelog": [
+    "0.6.0  Unified app shell — home dashboard + left sidebar nav connecting the live screens, with yellow build/sign-off status indicators",
     "0.5.0  Users & Roles screen — Yard Jockey role on a terminal user, with personalized QR",
     "0.4.0  Yard jockey app (priority moves, Start/Complete) + yard_moves backend",
     "0.3.0  Order entry — in-platform Shipper/Consignee/Bill-To lookups, create-on-the-fly, duplicate prevention",
