@@ -1,15 +1,17 @@
 {
   "app": "Aurora TMS",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "built": "2026-06-27",
   "stage": "prototype",
   "changelog": [
-    "0.6.1  Shared theme (aurora-theme.css) extracted from the demo's design language; home shell restyled to match",
-    "0.6.0  Unified app shell — home dashboard + left sidebar nav connecting the live screens, with yellow build/sign-off status indicators",
-    "0.5.0  Users & Roles screen — Yard Jockey role on a terminal user, with personalized QR",
-    "0.4.0  Yard jockey app (priority moves, Start/Complete) + yard_moves backend",
+    "0.7.0  Rich terminal-user profiles — role + capability/feature toggles (incl. Yard Jockey) + per-terminal access; QR shows when Yard Jockey capable",
+    "0.6.2  Home is a project roadmap (built vs planned, progress bar)",
+    "0.6.1  Shared theme (aurora-theme.css) from the demo; shell restyled",
+    "0.6.0  Unified app shell connecting live screens",
+    "0.5.0  Users & Roles + jockey QR (single role)",
+    "0.4.0  Yard jockey app + yard_moves backend",
     "0.3.0  Order entry — lookups, create-on-the-fly, duplicate prevention",
-    "0.2.0  Orders + Accounts live (read/write, multi-tenant)",
+    "0.2.0  Orders + Accounts live (multi-tenant)",
     "0.1.0  Admin onboarding + password gate; multi-tenant API foundation"
   ]
 }
