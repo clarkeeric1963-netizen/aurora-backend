@@ -36,7 +36,8 @@ public class TenantResolutionMiddleware
         // swagger, root, and the platform "/api/customers" registry don't need a tenant.
         bool isApi = path.StartsWith("/api", StringComparison.OrdinalIgnoreCase);
         bool isCustomersRegistry = path.StartsWith("/api/customers", StringComparison.OrdinalIgnoreCase);
-        bool tenantOptional = !isApi || isCustomersRegistry;
+        bool isRolesCatalog = path.StartsWith("/api/roles", StringComparison.OrdinalIgnoreCase);
+        bool tenantOptional = !isApi || isCustomersRegistry || isRolesCatalog;
 
         // 1. Figure out the candidate tenant slug.
         string? candidate = ctx.Request.Headers["X-Tenant"].FirstOrDefault();
