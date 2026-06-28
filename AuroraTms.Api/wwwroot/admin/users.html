@@ -3,172 +3,161 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Aurora TMS — Users & Roles</title>
+<title>Aurora TMS — Users & roles</title>
+<link rel="stylesheet" href="/aurora-theme.css" />
 <style>
-  :root{--blue:#2563eb;--cyan:#0e7490;--bg:#eef1f5;--card:#fff;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--input:#f1f5f9;--ok:#059669;--okbg:#dcfce7}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .bar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border)}
-  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+  html,body{height:100%}
+  body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
   .brand{font-weight:800}.brand span{color:var(--muted);font-weight:600}
-  .nav{display:flex;gap:14px;margin-left:18px}.nav a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}.nav a.active{color:var(--blue)}
-  .right{margin-left:auto;display:flex;align-items:center;gap:14px}
-  .tenantbox{display:flex;align-items:center;gap:8px}
-  .tenantbox label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-  .out{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;cursor:pointer}
-  select,input{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--input);font-size:13px;font-family:inherit;color:var(--text)}
-  select:focus,input:focus{outline:none;border-color:var(--blue)}
-  .wrap{max-width:960px;margin:22px auto;padding:0 16px}
-  .head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  h2{font-size:17px;font-weight:800}.count{font-size:12px;color:var(--muted);font-weight:600}.spacer{margin-left:auto}
-  .btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text)}
-  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn:disabled{opacity:.5}
-  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
-  .panel.hidden{display:none}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .field{display:flex;flex-direction:column;gap:4px}
+  .right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .out{font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
+  .body{flex:1;display:flex;min-height:0}
+  .list{width:280px;border-right:1px solid var(--border);overflow-y:auto;background:#fff;flex-shrink:0}
+  .urow{display:flex;align-items:center;gap:11px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--slate-100)}
+  .urow:hover{background:var(--slate-50)}.urow.sel{background:#eff6ff;box-shadow:inset 3px 0 0 var(--blue)}
+  .ava{width:36px;height:36px;border-radius:50%;background:#e0e7ff;color:#3730a3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+  .urow .nm{font-size:14px;font-weight:700}.urow .rl{font-size:12px;color:var(--muted)}
+  .jbadge{margin-left:auto;width:9px;height:9px;border-radius:50%;background:var(--amber)}
+  .editor{flex:1;overflow-y:auto;padding:22px;background:var(--bg)}
+  .editor .empty{color:var(--muted);text-align:center;padding:60px}
+  .sec{margin-bottom:18px;padding:18px}
+  .sec h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--slate-600);margin-bottom:14px}
+  .frow{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .field{display:flex;flex-direction:column;gap:5px}
   .field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-  .field input,.field select{width:100%}
-  .actions{display:flex;align-items:center;gap:10px;margin-top:14px}
-  .msg{font-size:13px;font-weight:600;min-height:18px}.msg.ok{color:var(--ok)}.msg.err{color:#dc2626}
-  .user{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;gap:16px;align-items:flex-start}
-  .user.jockey{border-color:var(--blue)}
-  .ava{width:40px;height:40px;border-radius:50%;background:#e0e7ff;color:#3730a3;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
-  .uinfo{flex:1}.uname{font-size:15px;font-weight:700}.umeta{font-size:12px;color:var(--muted);margin-top:2px}
-  .rolepick{margin-top:10px;display:flex;align-items:center;gap:8px}
-  .rolepick label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
-  .qrbox{display:flex;gap:14px;align-items:center;margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)}
-  .qr{width:120px;height:120px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px;flex-shrink:0}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{padding:8px 13px;border:1px solid var(--border);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;user-select:none}
+  .chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .chip.jockey.on{background:var(--amber);border-color:var(--amber)}
+  .term{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--slate-100)}
+  .term:last-child{border-bottom:none}
+  .toggle{width:42px;height:24px;border-radius:20px;background:var(--slate-300);position:relative;cursor:pointer;flex-shrink:0;transition:.15s}
+  .toggle.on{background:var(--blue)}
+  .toggle i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s}
+  .toggle.on i{left:21px}
+  .term .tn{font-size:14px;font-weight:600}.term .tl{font-size:12px;color:var(--muted)}
+  .qrbox{display:flex;gap:16px;align-items:center}
+  .qr{width:128px;height:128px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px;flex-shrink:0}
   .qrinfo{font-size:12px;color:var(--muted)}.qrinfo .lnk{color:var(--blue);word-break:break-all;font-weight:600}
-  .copy{margin-top:8px;border:1px solid var(--border);background:var(--card);border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text)}
-  .state{padding:40px;text-align:center;color:var(--muted);font-size:14px}.state.err{color:#dc2626}
+  .savebar{display:flex;align-items:center;gap:12px;margin-top:6px}
+  .msg{font-size:13px;font-weight:600}.msg.ok{color:var(--green-700)}.msg.err{color:#dc2626}
+  .new{padding:8px 14px}
 </style>
 </head>
-<body>
-<div class="bar">
-  <div class="logo">A</div>
-  <div class="brand">Aurora TMS <span>· Users &amp; roles</span></div>
-  <div class="nav"><a href="/admin/index.html">Onboarding</a><a href="/admin/users.html" class="active">Users</a></div>
-  <div class="right">
-    <div class="tenantbox"><label for="tenant">Tenant</label>
-      <select id="tenant"><option value="sefl">sefl</option><option value="gulfstates">gulfstates</option></select>
-    </div>
-    <a class="out" id="logout">Log out</a>
-  </div>
-</div>
-
-<div class="wrap">
-  <div class="head"><h2>Users &amp; roles</h2><span class="count" id="count"></span><div class="spacer"></div>
-    <button class="btn primary" id="toggleNew">+ New user</button>
-    <button class="btn" id="refresh">Refresh</button>
-  </div>
-
-  <div class="panel hidden" id="newPanel">
-    <div class="grid">
-      <div class="field"><label>Name</label><input id="f_name" placeholder="Marcus Johnson" /></div>
-      <div class="field"><label>Email</label><input id="f_email" type="email" placeholder="marcus@sefl.com" /></div>
-      <div class="field"><label>Role</label><select id="f_role"></select></div>
-      <div class="field"><label>Home terminal</label><input id="f_terminal" placeholder="ORL" /></div>
-      <div class="field"><label>Phone</label><input id="f_phone" placeholder="(404) 555-0100" /></div>
-    </div>
-    <div class="actions">
-      <button class="btn primary" id="create">Create user</button>
-      <button class="btn" id="cancel">Cancel</button>
-      <span class="msg" id="msg"></span>
+<body class="a">
+  <div class="a-topbar">
+    <div class="brand">Aurora TMS <span>· Users &amp; roles</span></div>
+    <div class="right">
+      <select class="a-select new" id="tenant" style="width:auto"><option value="sefl">sefl</option><option value="gulfstates">gulfstates</option></select>
+      <button class="a-btn a-btn-primary new" id="newUser">+ New user</button>
+      <span class="out" id="logout">Log out</span>
     </div>
   </div>
-
-  <div id="list"><div class="state">Loading…</div></div>
-</div>
+  <div class="body">
+    <div class="list" id="list"></div>
+    <div class="editor" id="editor"><div class="empty">Select a user to edit their role, capabilities, and terminal access.</div></div>
+  </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/version-badge.js"></script>
 <script>
-  const $ = id => document.getElementById(id);
-  const TENANT_KEY = "aurora_tenant_demo";
-  const ROLES = ["Company Admin","Terminal Manager","Dispatch Supervisor","Dock Coordinator","Billing Clerk","Check-In Clerk","Dispatcher","Yard Jockey","Operations Analyst","Dock"];
-  let users = [];
+  const $=id=>document.getElementById(id);
+  const ROLES=["Company Admin","Terminal Manager","Dispatch Supervisor","Dock Coordinator","Billing Clerk","Check-In Clerk","Dispatcher","Yard Jockey","Operations Analyst","Dock","Driver"];
+  const FEATURES=["Orders","Accounts","Dispatch","Yard","Drivers","Equipment","Manifest","Dock Ops","Billing","Reports","Settings"];
+  let users=[], terminals=[], sel=null, draft=null;
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
-  function tenant(){ return $("tenant").value; }
-  function initials(n){ return (n||"").split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase(); }
-  function roleOptions(sel){ return ROLES.map(r=>"<option"+(r===sel?" selected":"")+">"+r+"</option>").join(""); }
+  function tenant(){return $("tenant").value;}
+  function initials(n){return (n||"?").split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();}
+  function fkey(f){return f.toLowerCase().replace(/[^a-z]/g,"");}
 
-  async function api(path, method, body){
-    const res=await fetch(path,{method:method||"GET",headers:Object.assign({"X-Tenant":tenant()}, body?{"Content-Type":"application/json"}:{}),body:body?JSON.stringify(body):undefined});
-    if(res.status===401){ window.location.href="/admin/login.html"; throw new Error("Session expired"); }
+  async function api(path,method,body){
+    const res=await fetch(path,{method:method||"GET",headers:Object.assign({"X-Tenant":tenant()},body?{"Content-Type":"application/json"}:{}),body:body?JSON.stringify(body):undefined});
+    if(res.status===401){ location.href="/admin/login.html"; throw new Error("Session expired"); }
     if(!res.ok){ const t=await res.text(); throw new Error(t||("Error "+res.status)); }
     const t=await res.text(); return t?JSON.parse(t):null;
   }
 
-  function jockeyLink(u){ return location.origin+"/yard.html?tenant="+encodeURIComponent(tenant())+"&jockey="+encodeURIComponent(u.name||u.id); }
+  function modulesOf(u){ let m=u.modules; if(typeof m==="string"){try{m=JSON.parse(m);}catch(e){m=null;}} return m||{}; }
+  function termsOf(u){ let t=u.terminalAccess; if(typeof t==="string"){try{t=JSON.parse(t);}catch(e){t=null;}} return Array.isArray(t)?t:[]; }
 
-  function render(){
-    $("count").textContent = users.length + " user" + (users.length===1?"":"s");
-    if(!users.length){ $("list").innerHTML="<div class='state'>No users for this tenant. Add one above.</div>"; return; }
-    $("list").innerHTML="";
+  function renderList(){
+    const l=$("list"); l.innerHTML="";
+    if(!users.length){ l.innerHTML="<div class='empty' style='padding:30px;color:var(--muted)'>No users yet.</div>"; return; }
     users.forEach(u=>{
-      const isJ = u.role==="Yard Jockey";
-      const card=document.createElement("div"); card.className="user"+(isJ?" jockey":"");
-      const ava=document.createElement("div"); ava.className="ava"; ava.textContent=initials(u.name);
-      const info=document.createElement("div"); info.className="uinfo";
-      info.innerHTML="<div class='uname'>"+esc(u.name)+"</div><div class='umeta'>"+esc(u.email||"")+(u.terminal?(" · "+esc(u.terminal)):"")+"</div>";
-      const rp=document.createElement("div"); rp.className="rolepick";
-      rp.innerHTML="<label>Role</label>";
-      const sel=document.createElement("select"); sel.innerHTML=roleOptions(u.role);
-      sel.onchange=()=>changeRole(u, sel.value, sel);
-      rp.appendChild(sel); info.appendChild(rp);
-      if(isJ){
-        const qb=document.createElement("div"); qb.className="qrbox";
-        const qd=document.createElement("div"); qd.className="qr";
-        const qi=document.createElement("div"); qi.className="qrinfo";
-        const link=jockeyLink(u);
-        qi.innerHTML="Scan to open the yard app as <b>"+esc(u.name)+"</b>:<br><span class='lnk'>"+esc(link)+"</span>";
-        const cp=document.createElement("button"); cp.className="copy"; cp.textContent="Copy link";
-        cp.onclick=()=>{ navigator.clipboard&&navigator.clipboard.writeText(link); cp.textContent="Copied"; setTimeout(()=>cp.textContent="Copy link",1200); };
-        qi.appendChild(cp); qb.appendChild(qd); qb.appendChild(qi); info.appendChild(qb);
-        try{ new QRCode(qd,{text:link,width:120,height:120,correctLevel:QRCode.CorrectLevel.M}); }catch(e){ qd.textContent="QR n/a"; }
-      }
-      card.appendChild(ava); card.appendChild(info);
-      $("list").appendChild(card);
+      const m=modulesOf(u);
+      const r=document.createElement("div"); r.className="urow"+(sel&&sel.id===u.id?" sel":"");
+      r.innerHTML="<div class='ava'>"+esc(initials(u.name))+"</div><div><div class='nm'>"+esc(u.name)+"</div><div class='rl'>"+esc(u.role||"No role")+"</div></div>"+(m.yardjockey?"<span class='jbadge' title='Yard jockey capable'></span>":"");
+      r.onclick=()=>{ sel=u; draft=JSON.parse(JSON.stringify(u)); renderList(); renderEditor(); };
+      l.appendChild(r);
     });
   }
 
-  async function changeRole(u, role, sel){
-    sel.disabled=true;
-    try{ await api("/api/users/"+u.id,"PUT",Object.assign({},u,{role:role})); await load(); }
-    catch(e){ alert("Couldn't update role: "+e.message); sel.disabled=false; }
+  function renderEditor(){
+    if(!draft){ $("editor").innerHTML="<div class='empty'>Select a user to edit their role, capabilities, and terminal access.</div>"; return; }
+    const m=modulesOf(draft), grantedTerms=termsOf(draft);
+    const featChips=FEATURES.map(f=>{const k=fkey(f);return "<span class='chip "+(m[k]?"on":"")+"' data-feat='"+k+"'>"+f+"</span>";}).join("");
+    const termRows=terminals.length? terminals.map(t=>{
+      const on=grantedTerms.includes(t.id);
+      return "<div class='term'><div class='toggle "+(on?"on":"")+"' data-term='"+esc(t.id)+"'><i></i></div><div><div class='tn'>"+esc(t.name||t.id)+"</div><div class='tl'>"+esc([t.city,t.state].filter(Boolean).join(", "))+(t.docks?(" · "+t.docks+" docks"):"")+"</div></div></div>";
+    }).join("") : "<div class='tl' style='color:var(--muted);font-size:13px'>No terminals found for this tenant.</div>";
+
+    const isJockey=!!m.yardjockey;
+    const link=location.origin+"/yard.html?tenant="+encodeURIComponent(tenant())+"&jockey="+encodeURIComponent(draft.name||draft.id);
+    const qrSection=isJockey? "<div class='a-card sec'><h3>Yard jockey QR</h3><div class='qrbox'><div class='qr' id='qr'></div><div class='qrinfo'>Scan to open the yard app as <b>"+esc(draft.name)+"</b>:<br><span class='lnk'>"+esc(link)+"</span></div></div></div>" : "";
+
+    $("editor").innerHTML=
+      "<div class='a-card sec'><h3>Identity</h3><div class='frow'>"+
+        "<div class='field'><label>Name</label><input class='a-input' id='f_name' value='"+esc(draft.name||"")+"'></div>"+
+        "<div class='field'><label>Email</label><input class='a-input' id='f_email' value='"+esc(draft.email||"")+"'></div>"+
+        "<div class='field'><label>Phone</label><input class='a-input' id='f_phone' value='"+esc(draft.phone||"")+"'></div>"+
+        "<div class='field'><label>Status</label><select class='a-select' id='f_status'><option"+(draft.status==="Active"?" selected":"")+">Active</option><option"+(draft.status==="Inactive"?" selected":"")+">Inactive</option></select></div>"+
+      "</div></div>"+
+      "<div class='a-card sec'><h3>Primary role</h3><select class='a-select' id='f_role' style='max-width:340px'>"+ROLES.map(r=>"<option"+(draft.role===r?" selected":"")+">"+r+"</option>").join("")+"</select></div>"+
+      "<div class='a-card sec'><h3>Capabilities</h3>"+
+        "<div style='margin-bottom:12px'><span class='chip jockey "+(isJockey?"on":"")+"' data-feat='yardjockey'>&#9888; Yard Jockey capable</span></div>"+
+        "<div style='font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px'>Feature visibility</div>"+
+        "<div class='chips'>"+featChips+"</div></div>"+
+      "<div class='a-card sec'><h3>Terminal access</h3>"+termRows+"</div>"+
+      qrSection+
+      "<div class='savebar'><button class='a-btn a-btn-primary' id='save'>Save profile</button><span class='msg' id='msg'></span></div>";
+
+    document.querySelectorAll(".chip[data-feat]").forEach(c=>c.onclick=()=>{
+      const k=c.getAttribute("data-feat"); const mm=modulesOf(draft); mm[k]=!mm[k]; draft.modules=mm; renderEditor();
+    });
+    document.querySelectorAll(".toggle[data-term]").forEach(t=>t.onclick=()=>{
+      const id=t.getAttribute("data-term"); let arr=termsOf(draft); arr=arr.includes(id)?arr.filter(x=>x!==id):arr.concat([id]); draft.terminalAccess=arr; renderEditor();
+    });
+    ["f_name","f_email","f_phone"].forEach(id=>{const el=$(id); if(el)el.oninput=()=>{ draft[id.slice(2)]=el.value; };});
+    $("f_status").onchange=e=>draft.status=e.target.value;
+    $("f_role").onchange=e=>draft.role=e.target.value;
+    $("save").onclick=save;
+    if(isJockey){ try{ new QRCode($("qr"),{text:link,width:128,height:128,correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+  }
+
+  async function save(){
+    const msg=$("msg"); msg.className="msg"; msg.textContent="";
+    if(!draft.name){ msg.className="msg err"; msg.textContent="Name is required."; return; }
+    if(!draft.email){ msg.className="msg err"; msg.textContent="Email is required."; return; }
+    $("save").disabled=true; $("save").textContent="Saving…";
+    try{
+      draft.tenantId=tenant();
+      if(draft.__new){ draft.id="USR-"+Math.random().toString(36).slice(2,8).toUpperCase(); delete draft.__new; await api("/api/users","POST",draft); }
+      else { await api("/api/users/"+draft.id,"PUT",draft); }
+      msg.className="msg ok"; msg.textContent="Saved.";
+      await load(); const again=users.find(u=>u.id===draft.id); if(again){ sel=again; draft=JSON.parse(JSON.stringify(again)); } renderList(); renderEditor();
+    }catch(e){ msg.className="msg err"; msg.textContent=e.message; $("save").disabled=false; $("save").textContent="Save profile"; }
   }
 
   async function load(){
-    $("list").innerHTML="<div class='state'>Loading…</div>";
-    try{ users=await api("/api/users"); render(); }
-    catch(e){ $("list").innerHTML="<div class='state err'>Couldn't load users: "+esc(e.message)+"</div>"; }
+    try{ users=await api("/api/users"); }catch(e){ users=[]; }
+    try{ terminals=await api("/api/terminals")||[]; }catch(e){ terminals=[]; }
+    renderList();
   }
 
-  function showForm(s){ $("newPanel").classList.toggle("hidden",!s); }
-  $("toggleNew").addEventListener("click",()=>showForm($("newPanel").classList.contains("hidden")));
-  $("cancel").addEventListener("click",()=>showForm(false));
-  $("refresh").addEventListener("click",load);
-  $("logout").addEventListener("click",async()=>{ try{await fetch("/admin/logout",{method:"POST"});}catch(e){} window.location.href="/admin/login.html"; });
-  $("tenant").addEventListener("change",()=>{ try{localStorage.setItem(TENANT_KEY,tenant());}catch(e){} load(); });
-
-  $("create").addEventListener("click",async()=>{
-    const msg=$("msg"); msg.className="msg"; msg.textContent="";
-    const name=$("f_name").value.trim(), email=$("f_email").value.trim();
-    if(!name){ msg.className="msg err"; msg.textContent="Name is required."; return; }
-    if(!email){ msg.className="msg err"; msg.textContent="Email is required."; return; }
-    const body={ id:"USR-"+Math.random().toString(36).slice(2,8).toUpperCase(), tenantId:tenant(), name:name, email:email,
-      role:$("f_role").value, terminal:$("f_terminal").value.trim()||null, phone:$("f_phone").value.trim()||null, status:"Active" };
-    $("create").disabled=true; $("create").textContent="Creating…";
-    try{ await api("/api/users","POST",body); msg.className="msg ok"; msg.textContent="User created.";
-      ["f_name","f_email","f_terminal","f_phone"].forEach(id=>$(id).value=""); load(); setTimeout(()=>showForm(false),700);
-    }catch(e){ msg.className="msg err"; msg.textContent=e.message; }
-    finally{ $("create").disabled=false; $("create").textContent="Create user"; }
-  });
-
-  $("f_role").innerHTML=roleOptions("Yard Jockey");
-  try{const t=localStorage.getItem(TENANT_KEY); if(t)$("tenant").value=t;}catch(e){}
+  $("newUser").onclick=()=>{ sel=null; draft={__new:true,name:"",email:"",role:"Yard Jockey",status:"Active",modules:{},terminalAccess:[]}; renderList(); renderEditor(); };
+  $("logout").onclick=async()=>{ try{await fetch("/admin/logout",{method:"POST"});}catch(e){} location.href="/admin/login.html"; };
+  $("tenant").onchange=()=>{ sel=null; draft=null; load(); renderEditor(); };
   load();
 </script>
-<script src="/version-badge.js"></script>
 </body>
 </html>
