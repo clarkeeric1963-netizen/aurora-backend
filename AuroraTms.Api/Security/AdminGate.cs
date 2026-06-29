@@ -4,6 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuroraTms.Api.Security;
 
+/// <summary>
+/// Stopgap gate over the super-admin surface: the /admin onboarding UI and the
+/// platform endpoints it uses (/api/customers, /api/users). Requires a valid
+/// "admin_auth" cookie issued by /admin/login after the correct ADMIN_PASSWORD.
+/// Fails closed: if ADMIN_PASSWORD isn't set, the admin area is unreachable.
+/// Tenant data routes are untouched. This is NOT the full auth system.
+/// </summary>
 public class AdminGateMiddleware
 {
     private readonly RequestDelegate _next;
@@ -17,7 +24,8 @@ public class AdminGateMiddleware
         bool isLoginRoute = path.StartsWith("/admin/login", StringComparison.OrdinalIgnoreCase)
                          || path.StartsWith("/admin/logout", StringComparison.OrdinalIgnoreCase);
         bool isPlatformApi = path.StartsWith("/api/customers", StringComparison.OrdinalIgnoreCase)
-                          || path.StartsWith("/api/users", StringComparison.OrdinalIgnoreCase);
+                          || path.StartsWith("/api/users", StringComparison.OrdinalIgnoreCase)
+                          || path.StartsWith("/api/roles", StringComparison.OrdinalIgnoreCase);
 
         bool needsGate = (isAdminArea && !isLoginRoute) || isPlatformApi;
         if (!needsGate || IsAuthed(ctx))
