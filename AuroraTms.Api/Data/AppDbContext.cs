@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<OrderLineItem> OrderLineItems => Set<OrderLineItem>();
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<YardMove> YardMoves => Set<YardMove>();
+    public DbSet<RoleDef> Roles => Set<RoleDef>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -120,6 +121,14 @@ public class AppDbContext : DbContext
             e.HasIndex(x => x.TenantId);
             e.HasIndex(x => x.TerminalId);
             e.HasQueryFilter(x => x.TenantId == _tenant.TenantId);
+        });
+
+        // ---- Role catalog (GLOBAL — owned by Aurora, shared by all tenants; NOT tenant-filtered) ----
+        b.Entity<RoleDef>(e =>
+        {
+            e.ToTable("roles");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Modules).HasColumnType("jsonb");
         });
     }
 }
