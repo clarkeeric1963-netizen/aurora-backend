@@ -82,6 +82,32 @@ using (var scope = app.Services.CreateScope())
         );");
     db.Database.ExecuteSqlRaw(@"CREATE INDEX IF NOT EXISTS ""IX_yard_moves_TenantId"" ON yard_moves (""TenantId"");");
     db.Database.ExecuteSqlRaw(@"ALTER TABLE drivers ADD COLUMN IF NOT EXISTS ""IsYardJockey"" boolean NOT NULL DEFAULT FALSE;");
+
+    // ---- Global role catalog (owned by Aurora, shared by all tenants). Idempotent. ----
+    db.Database.ExecuteSqlRaw(@"
+        CREATE TABLE IF NOT EXISTS roles (
+            ""Id"" text NOT NULL,
+            ""Name"" text NOT NULL,
+            ""Description"" text NULL,
+            ""Modules"" jsonb NULL,
+            ""IsSystem"" boolean NOT NULL DEFAULT FALSE,
+            ""SortOrder"" integer NOT NULL DEFAULT 0,
+            CONSTRAINT ""PK_roles"" PRIMARY KEY (""Id"")
+        );");
+    db.Database.ExecuteSqlRaw(@"
+        INSERT INTO roles (""Id"",""Name"",""Description"",""Modules"",""IsSystem"",""SortOrder"") VALUES
+        ('ROLE-company-admin','Company Admin','Full access across the company','{""orders"":true,""accounts"":true,""dispatch"":true,""yard"":true,""drivers"":true,""equipment"":true,""manifest"":true,""dockops"":true,""billing"":true,""reports"":true,""settings"":true}',TRUE,1),
+        ('ROLE-terminal-manager','Terminal Manager','Manages a terminal''s operations','{""orders"":true,""accounts"":true,""dispatch"":true,""yard"":true,""drivers"":true,""equipment"":true,""manifest"":true,""dockops"":true,""billing"":true,""reports"":true}',TRUE,2),
+        ('ROLE-dispatch-supervisor','Dispatch Supervisor','Oversees dispatch','{""orders"":true,""dispatch"":true,""yard"":true,""drivers"":true,""equipment"":true,""manifest"":true,""reports"":true}',TRUE,3),
+        ('ROLE-dock-coordinator','Dock Coordinator','Coordinates dock operations','{""orders"":true,""yard"":true,""manifest"":true,""dockops"":true,""equipment"":true}',TRUE,4),
+        ('ROLE-billing-clerk','Billing Clerk','Handles billing and invoicing','{""accounts"":true,""billing"":true,""reports"":true}',TRUE,5),
+        ('ROLE-checkin-clerk','Check-In Clerk','Driver check-in','{""orders"":true,""manifest"":true,""dockops"":true}',TRUE,6),
+        ('ROLE-dispatcher','Dispatcher','Assigns and dispatches loads','{""orders"":true,""dispatch"":true,""drivers"":true,""manifest"":true}',TRUE,7),
+        ('ROLE-yard-jockey','Yard Jockey','Moves trailers in the yard','{""yard"":true}',TRUE,8),
+        ('ROLE-operations-analyst','Operations Analyst','Reporting and analysis','{""orders"":true,""dispatch"":true,""reports"":true}',TRUE,9),
+        ('ROLE-dock','Dock','Dock worker','{""dockops"":true}',TRUE,10),
+        ('ROLE-driver','Driver','Driver','{}',TRUE,11)
+        ON CONFLICT (""Id"") DO NOTHING;");
     db.Database.ExecuteSqlRaw(@"
         INSERT INTO yard_moves (""Id"",""TenantId"",""TerminalId"",""Type"",""Trailer"",""FromLoc"",""ToLoc"",""Priority"",""Urgent"",""Reason"",""Manifest"",""Jockey"",""Status"",""CreatedAt"")
         VALUES
